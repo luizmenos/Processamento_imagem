@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processamento de Imagem</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container p-5">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <input type="file" class="form-control" id="arquivoInput" accept="image/*"
+                            onchange="openFile(event)">
+                    </div>
+                    <div class="col-md-12 pt-3">
+                        <img id='output'>
+                    </div>
+                    <div class="col-md-12 pt-3">
+                        <canvas id="canvasOutput"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var openFile = function (file) {
+            var input = file.target;
+            var reader = new FileReader();
+            reader.onload = function (evt) {
+                var dataURL = reader.result;
+                var output = document.getElementById('output');
+                output.src = dataURL;
+
+                var img = new Image();
+                img.onload = function () {
+                    var canvas = document.getElementById('canvasOutput');
+                    var ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    var pixels = imageData.data;
+
+                    var matrix_inv = [];
+                    for (var y = 0; y < canvas.height; y++) {
+                        var row = [];
+                        for (var x = 0; x < canvas.width; x++) {
+                            var index = (y * canvas.width + x) * 4;
+                            var r = 255 - pixels[index];
+                            var g = 255 - pixels[index + 1];
+                            var b = 255 - pixels[index + 2];
+                            row.push([r, g, b]);
+                        }
+                        matrix_inv.push(row);
+                    }
+
+                    // Desenhar a imagem invertida no canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (var y = 0; y < canvas.height; y++) {
+                        for (var x = 0; x < canvas.width; x++) {
+                            var pixel = matrix_inv[y][x];
+                            ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+                };
+                img.src = dataURL;
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
+    </script>
+
+</body>
+
+</html>
