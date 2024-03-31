@@ -25,7 +25,7 @@
                 <div class="row d-none row-images pt-5">
                     <div class="col-md-6">
                         <h6>Primeira Imagem</h6>
-                        <img class="img-fluid" id="first-image">
+                        <img class="img-fluid" id="first-image" onclick="selectRegion(event)" style="cursor: crosshair;">
                     </div>
                     <div class="col-md-6">
                         <h6>Segunda Imagem</h6>
@@ -37,9 +37,12 @@
                     <button onclick="somarImagens()" class="btn btn-primary">Somar</button>
                     <button onclick="subtrairImagens()" class="btn btn-primary">Subtrair</button>
                     <button onclick="flipLR()" class="btn btn-primary">Flip Horizontal</button>
+                    <button onclick="flipUD()" class="btn btn-primary">Flip Vertical</button>
+                    <button onclick="concatenarImagens()" class="btn btn-primary">Concatenar Imagens</button>
                 </div>
             </div>
         </div>
+      
         <div class="card inversao d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -60,6 +63,7 @@
                 </div>
             </div>
         </div>
+        
         <div class="card soma d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -75,6 +79,7 @@
                 </div>
             </div>
         </div>
+       
         <div class="card subtracao d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -90,6 +95,7 @@
                 </div>
             </div>
         </div>
+       
         <div class="card flipLR d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -105,12 +111,40 @@
                 </div>
             </div>
         </div>
+       
+        <div class="card flipUD d-none mb-4">
+            <div class="card-header">
+                <div class="card-title">
+                    <h4>Flip UD</h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 pt-3">
+                        <h5>Resultado da Flipada</h5>
+                        <canvas id="canvasFlipUD" class="img-fluid"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card concatenation d-none mb-4">
+            <div class="card-header">
+                <div class="card-title">
+                    <h4>Concatenação</h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 pt-3">
+                        <h5>Resultado da Concatenação</h5>
+                        <img id="concatenated-image" class="img-fluid" />
+                    </div>
+                </div>
+            </div>
+        </div>        
     </div>
 
     <script src="js/script.js"></script>
-
-
-
 </body>
-
 </html>
