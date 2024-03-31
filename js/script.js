@@ -1,7 +1,7 @@
 function imagem1(file) {
     var input = file.target;
     var reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function (evt) {
         var dataURL = reader.result;
         var output = document.getElementById('first-image');
         output.src = dataURL;
@@ -15,7 +15,7 @@ function imagem1(file) {
 function imagem2(file) {
     var input = file.target;
     var reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function (evt) {
         var dataURL = reader.result;
         var output = document.getElementById('second-image');
         output.src = dataURL;
@@ -34,7 +34,7 @@ function inverterImagem() {
     }
 
     var reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function (evt) {
         var dataURL = reader.result;
         var output = document.getElementById('output');
         output.src = dataURL;
@@ -42,7 +42,7 @@ function inverterImagem() {
         var img = new Image();
 
         document.querySelector('.inversao').classList.remove('d-none');
-        img.onload = function() {
+        img.onload = function () {
             var canvas = document.getElementById('canvasOutput');
             var ctx = canvas.getContext('2d');
             canvas.width = img.width;
@@ -92,13 +92,13 @@ function somarImagens() {
     var reader1 = new FileReader();
     var reader2 = new FileReader();
 
-    reader1.onload = function(evt) {
-        reader2.onload = function(evt2) {
+    reader1.onload = function (evt) {
+        reader2.onload = function (evt2) {
             var img1 = new Image();
             var img2 = new Image();
 
-            img1.onload = function() {
-                img2.onload = function() {
+            img1.onload = function () {
+                img2.onload = function () {
                     var maxWidth = Math.max(img1.width, img2.width);
                     var maxHeight = Math.max(img1.height, img2.height);
 
@@ -168,13 +168,13 @@ function subtrairImagens() {
     var reader1 = new FileReader();
     var reader2 = new FileReader();
 
-    reader1.onload = function(evt) {
-        reader2.onload = function(evt2) {
+    reader1.onload = function (evt) {
+        reader2.onload = function (evt2) {
             var img1 = new Image();
             var img2 = new Image();
 
-            img1.onload = function() {
-                img2.onload = function() {
+            img1.onload = function () {
+                img2.onload = function () {
 
 
                     var maxWidth = Math.max(img1.width, img2.width);
@@ -239,13 +239,13 @@ function flipLR() {
     }
 
     var reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function (evt) {
         var dataURL = reader.result;
 
 
         var img = new Image();
 
-        img.onload = function() {
+        img.onload = function () {
             var canvas = document.getElementById('canvasFlipLR');
             var ctx = canvas.getContext('2d');
             canvas.width = img.width;
@@ -284,6 +284,108 @@ function flipLR() {
         img.src = dataURL;
     };
     reader.readAsDataURL(input.files[0]);
+}
+
+function flipUD() {
+    var input = document.getElementById('arquivoInput');
+    if (!input.files[0]) {
+        alert('Selecione uma imagem para processar.');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var dataURL = reader.result;
+
+        var img = new Image();
+
+        img.onload = function () {
+            var canvas = document.getElementById('canvasFlipUD');
+            var ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var pixels = imageData.data;
+
+            var matrix_inv = [];
+            for (var y = 0; y < canvas.height; y++) {
+                var row = [];
+                for (var x = 0; x < canvas.width; x++) {
+                    var indexUp = ((canvas.height - 1 - y) * canvas.width + x) * 4;
+
+                    var r = pixels[indexUp];
+                    var g = pixels[indexUp + 1];
+                    var b = pixels[indexUp + 2];
+                    row.push([r, g, b]);
+                }
+                matrix_inv.push(row);
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var y = 0; y < canvas.height; y++) {
+                for (var x = 0; x < canvas.width; x++) {
+                    var pixel = matrix_inv[y][x];
+                    ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+
+            document.querySelector('.flipUD').classList.remove('d-none');
+        };
+        img.src = dataURL;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function concatenarImagens() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+    var input2 = document.getElementById('arquivoInput2').files[0];
+
+    if (!input1 || !input2) {
+        alert('Selecione duas imagens para concatenar.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+    var reader2 = new FileReader();
+
+    reader1.onload = function (evt) {
+        reader2.onload = function (evt2) {
+            var img1 = new Image();
+            var img2 = new Image();
+
+            img1.onload = function () {
+                img2.onload = function () {
+                    var maxWidth = Math.max(img1.width, img2.width);
+                    var maxHeight = Math.max(img1.height, img2.height);
+                    var widthRatio1 = maxWidth / img1.width;
+                    var heightRatio1 = maxHeight / img1.height;
+                    var widthRatio2 = maxWidth / img2.width;
+                    var heightRatio2 = maxHeight / img2.height;
+
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+
+                    canvas.width = maxWidth * 2;
+                    canvas.height = maxHeight;
+
+                    ctx.drawImage(img1, 0, 0, img1.width * widthRatio1, img1.height * heightRatio1);
+                    ctx.drawImage(img2, maxWidth, 0, img2.width * widthRatio2, img2.height * heightRatio2);
+
+                    var concatenatedImage = document.getElementById('concatenated-image');
+                    concatenatedImage.src = canvas.toDataURL('image/png');
+
+                    document.querySelector('.concatenation').classList.remove('d-none');
+                };
+                img2.src = evt2.target.result;
+            };
+            img1.src = evt.target.result;
+        };
+        reader2.readAsDataURL(input2);
+    };
+    reader1.readAsDataURL(input1);
 }
 
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
