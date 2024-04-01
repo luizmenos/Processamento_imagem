@@ -463,6 +463,77 @@ function recortarImagem() {
     fileReader.readAsDataURL(input.files[0]);
 }
 
+function limializarImagem() {
+    var input = document.getElementById('arquivoInput');
+    if (!input.files[0]) {
+        alert('Selecione uma imagem para processar.');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o valor do limiar, sendo de 0 à 255");
+    var limiar = parseInt(inputNumber);
+    if (isNaN(limiar) || (limiar > 255 || limiar < 0)) {
+        alert('Digite um número válido.');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var dataURL = reader.result;
+
+        var img = new Image();
+
+
+        img.onload = function () {
+            var canvas = document.getElementById('canvasLimiar');
+            var ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var pixels = imageData.data;
+
+            var matrix_inv = [];
+            for (var y = 0; y < canvas.height; y++) {
+                var row = [];
+                for (var x = 0; x < canvas.width; x++) {
+                    var index = (y * canvas.width + x) * 4;
+                    var r = pixels[index];
+                    var g = pixels[index + 1];
+                    var b = pixels[index + 2];
+
+                    var gray = (r + g + b) / 3;
+                    if (gray >= limiar) {
+                        gray = 255;
+                    } else {
+                        gray = 0;
+                    }
+
+                    row.push([gray, gray, gray]);
+                }
+                matrix_inv.push(row);
+            }
+
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var y = 0; y < canvas.height; y++) {
+                for (var x = 0; x < canvas.width; x++) {
+                    var pixel = matrix_inv[y][x];
+                    ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+            var imageDataURL = canvas.toDataURL();
+            document.querySelector('.limiar').classList.remove('d-none');
+            downloadImage(imageDataURL, 'limiar');
+        };
+        img.src = dataURL;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext('2d');
