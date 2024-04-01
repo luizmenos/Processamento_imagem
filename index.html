@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Processamento de Imagem</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <script src="js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -15,17 +14,20 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <input type="file" class="form-control" id="arquivoInput" accept="image/*,.png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem1(event)">
+                        <input type="file" class="form-control" id="arquivoInput"
+                            accept="image/*,.png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem1(event)">
                     </div>
 
                     <div class="col-md-6">
-                        <input type="file" class="form-control" id="arquivoInput2" accept="image/*" onchange="imagem2(event)">
+                        <input type="file" class="form-control" id="arquivoInput2" accept="image/*"
+                            onchange="imagem2(event)">
                     </div>
                 </div>
                 <div class="row d-none row-images pt-5">
                     <div class="col-md-6">
                         <h6>Primeira Imagem</h6>
-                        <img class="img-fluid" id="first-image" onclick="selectRegion(event)" style="cursor: crosshair;">
+                        <img class="img-fluid" id="first-image" onclick="selectRegion(event)"
+                            style="cursor: crosshair;">
                     </div>
                     <div class="col-md-6">
                         <h6>Segunda Imagem</h6>
@@ -39,10 +41,11 @@
                     <button onclick="flipLR()" class="btn btn-primary">Flip Horizontal</button>
                     <button onclick="flipUD()" class="btn btn-primary">Flip Vertical</button>
                     <button onclick="concatenarImagens()" class="btn btn-primary">Concatenar Imagens</button>
+                    <button onclick="recortarImagem()" class="btn btn-primary">Recortar</button>
                 </div>
             </div>
         </div>
-      
+
         <div class="card inversao d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -53,17 +56,18 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-12 pt-3">
-                        <h5>Original</h5>
-                        <img id="output" class="img-fluid" />
-                    </div>
-                    <div class="col-md-12 pt-3">
-                        <h5>Invertida</h5>
+                        <h5>Resultado da Invertida</h5>
                         <canvas id="canvasOutput" class="img-fluid"></canvas>
+                    </div>
+                    <div class="col-md-12 pt-3 text-end">
+
+                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
+
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="card soma d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -76,10 +80,15 @@
                         <h5>Resultado da Soma</h5>
                         <canvas id="canvasSoma" class="img-fluid"></canvas>
                     </div>
+                    <div class="col-md-12 pt-3 text-end">
+
+                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
+
+                    </div>
                 </div>
             </div>
         </div>
-       
+
         <div class="card subtracao d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -92,10 +101,15 @@
                         <h5>Resultado da Subtração</h5>
                         <canvas id="canvasSubtracao" class="img-fluid"></canvas>
                     </div>
+                    <div class="col-md-12 pt-3 text-end">
+
+                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
+
+                    </div>
                 </div>
             </div>
         </div>
-       
+
         <div class="card flipLR d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -108,10 +122,15 @@
                         <h5>Resultado da Flipada</h5>
                         <canvas id="canvasFlipLR" class="img-fluid"></canvas>
                     </div>
+                    <div class="col-md-12 pt-3 text-end">
+
+                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
+
+                    </div>
                 </div>
             </div>
         </div>
-       
+
         <div class="card flipUD d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
@@ -124,11 +143,16 @@
                         <h5>Resultado da Flipada</h5>
                         <canvas id="canvasFlipUD" class="img-fluid"></canvas>
                     </div>
+                    <div class="col-md-12 pt-3 text-end">
+
+                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
+
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card concatenation d-none mb-4">
+        <div class="card concatenacao d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
                     <h4>Concatenação</h4>
@@ -138,13 +162,39 @@
                 <div class="row">
                     <div class="col-md-12 pt-3">
                         <h5>Resultado da Concatenação</h5>
-                        <img id="concatenated-image" class="img-fluid" />
+                        <canvas id="canvasConcatenacao" class="img-fluid"></canvas>
+                    </div>
+                    <div class="col-md-12 pt-3 text-end">
+
+                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
+
                     </div>
                 </div>
             </div>
-        </div>        
+        </div>
+        <div class="card recorte d-none mb-4">
+            <div class="card-header">
+                <div class="card-title">
+                    <h4>Recorte</h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 pt-3">
+                        <h5>Resultado do Recorte</h5>
+                        <canvas id="canvasRecorte" class="img-fluid"></canvas>
+                    </div>
+                    <div class="col-md-12 pt-3 text-end">
+
+                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="js/script.js"></script>
 </body>
+
 </html>

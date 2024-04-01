@@ -36,12 +36,10 @@ function inverterImagem() {
     var reader = new FileReader();
     reader.onload = function (evt) {
         var dataURL = reader.result;
-        var output = document.getElementById('output');
-        output.src = dataURL;
 
         var img = new Image();
 
-        document.querySelector('.inversao').classList.remove('d-none');
+
         img.onload = function () {
             var canvas = document.getElementById('canvasOutput');
             var ctx = canvas.getContext('2d');
@@ -74,6 +72,9 @@ function inverterImagem() {
                     ctx.fillRect(x, y, 1, 1);
                 }
             }
+            var imageDataURL = canvas.toDataURL();
+            document.querySelector('.inversao').classList.remove('d-none');
+            downloadImage(imageDataURL, 'inversao');
         };
         img.src = dataURL;
     };
@@ -141,7 +142,11 @@ function somarImagens() {
                             ctx.fillRect(x, y, 1, 1);
                         }
                     }
+                    var imageDataURL = canvas.toDataURL();
+
                     document.querySelector('.soma').classList.remove('d-none');
+
+                    downloadImage(imageDataURL, 'soma');
                 };
 
                 img2.src = evt2.target.result;
@@ -220,7 +225,11 @@ function subtrairImagens() {
                         }
                     }
 
+
+                    var imageDataURL = canvas.toDataURL();
+
                     document.querySelector('.subtracao').classList.remove('d-none');
+                    downloadImage(imageDataURL, 'subtracao');
                 };
                 img2.src = evt2.target.result;
             };
@@ -279,7 +288,9 @@ function flipLR() {
                 }
             }
 
+            var imageDataURL = canvas.toDataURL();
             document.querySelector('.flipLR').classList.remove('d-none');
+            downloadImage(imageDataURL, 'flipLR');
         };
         img.src = dataURL;
     };
@@ -332,7 +343,10 @@ function flipUD() {
                 }
             }
 
+            var imageDataURL = canvas.toDataURL();
+
             document.querySelector('.flipUD').classList.remove('d-none');
+            downloadImage(imageDataURL, 'flipUD');
         };
         img.src = dataURL;
     };
@@ -365,7 +379,7 @@ function concatenarImagens() {
                     var widthRatio2 = maxWidth / img2.width;
                     var heightRatio2 = maxHeight / img2.height;
 
-                    var canvas = document.createElement('canvas');
+                    var canvas = document.getElementById('canvasConcatenacao');
                     var ctx = canvas.getContext('2d');
 
                     canvas.width = maxWidth * 2;
@@ -374,10 +388,10 @@ function concatenarImagens() {
                     ctx.drawImage(img1, 0, 0, img1.width * widthRatio1, img1.height * heightRatio1);
                     ctx.drawImage(img2, maxWidth, 0, img2.width * widthRatio2, img2.height * heightRatio2);
 
-                    var concatenatedImage = document.getElementById('concatenated-image');
-                    concatenatedImage.src = canvas.toDataURL('image/png');
+                    var imageDataURL = canvas.toDataURL();
 
-                    document.querySelector('.concatenation').classList.remove('d-none');
+                    document.querySelector('.concatenacao').classList.remove('d-none');
+                    downloadImage(imageDataURL, 'concatenacao');
                 };
                 img2.src = evt2.target.result;
             };
@@ -386,6 +400,67 @@ function concatenarImagens() {
         reader2.readAsDataURL(input2);
     };
     reader1.readAsDataURL(input1);
+}
+
+function recortarImagem() {
+    var input = document.getElementById('arquivoInput');
+
+    if (!input.files[0]) {
+        alert('Selecione uma imagem para processar.');
+        return;
+    }
+
+    var linhas = prompt("Insira a linha inicial e final do arranjo (Ex: 0:5)");
+    var colunas = prompt("Insira a coluna inicial e final do arranjo (Ex: 0:5)");
+
+    linhas = linhas.split(':');
+    colunas = colunas.split(':');
+
+    if (linhas.length !== 2 || colunas.length !== 2) {
+        alert("Por favor, insira um intervalo válido para linhas e colunas.");
+        return false;
+    }
+
+    var width = 0, height = 0;
+
+    var linhaInicial = linhas[0] === "" ? 0 : parseInt(linhas[0]);
+    var linhaFinal = linhas[1] === "" ? undefined : parseInt(linhas[1]);
+
+    var colunaInicial = colunas[0] === "" ? 0 : parseInt(colunas[0]);
+    var colunaFinal = colunas[1] === "" ? undefined : parseInt(colunas[1]);
+
+    if (linhaFinal != undefined & linhaInicial != 0) {
+        if (linhaInicial > linhaFinal) { alert("Por favor, insira um intervalo válido para linhas."); return false; }
+    }
+    if (colunaFinal != undefined & colunaInicial != 0) {
+        if (colunaInicial > colunaFinal) { alert("Por favor, insira um intervalo válido para colunas."); return false; }
+    }
+
+
+    var fileReader = new FileReader();
+    fileReader.onload = function (evt) {
+        var image = new Image();
+        image.onload = function () {
+
+            var canvas = document.getElementById('canvasRecorte');
+            var context = canvas.getContext('2d');
+
+            width = colunaFinal !== undefined ? colunaFinal - colunaInicial : image.width - colunaInicial;
+            height = linhaFinal !== undefined ? linhaFinal - linhaInicial : image.height - linhaInicial;
+            canvas.width = width;
+            canvas.height = height;
+
+            context.drawImage(image, colunaInicial, linhaInicial, width, height, 0, 0, width, height);
+            document.querySelector('.recorte').classList.remove('d-none');
+
+            var imageDataURL = canvas.toDataURL();
+            downloadImage(imageDataURL, 'recorte');
+
+        };
+        image.src = evt.target.result;
+
+    };
+    fileReader.readAsDataURL(input.files[0]);
 }
 
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
@@ -406,4 +481,10 @@ function resizeImageToMatchSize(image, maxWidth, maxHeight) {
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     return canvas;
+}
+
+function downloadImage(imageData, metodo) {
+    var link = document.querySelector('.' + metodo + ' #salvarImagem');
+    link.download = 'imagem_' + metodo + '.jpg';
+    link.href = imageData;
 }
