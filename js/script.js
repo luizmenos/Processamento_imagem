@@ -41,7 +41,7 @@ function inverterImagem() {
 
 
         img.onload = function () {
-            var canvas = document.getElementById('canvasOutput');
+            var canvas = document.getElementById('canvasResultado');
             var ctx = canvas.getContext('2d');
             canvas.width = img.width;
             canvas.height = img.height;
@@ -73,7 +73,7 @@ function inverterImagem() {
                 }
             }
             var imageDataURL = canvas.toDataURL();
-            document.querySelector('.inversao').classList.remove('d-none');
+            document.querySelector('.resultado').classList.remove('d-none');
             downloadImage(imageDataURL, 'inversao');
         };
         img.src = dataURL;
@@ -128,7 +128,8 @@ function somarImagens() {
                         matrixSubt.push(row);
                     }
 
-                    var canvas = document.getElementById('canvasSoma');
+
+                    var canvas = document.getElementById('canvasResultado');
                     var ctx = canvas.getContext('2d');
 
                     canvas.width = maxWidth;
@@ -144,7 +145,7 @@ function somarImagens() {
                     }
                     var imageDataURL = canvas.toDataURL();
 
-                    document.querySelector('.soma').classList.remove('d-none');
+                    document.querySelector('.resultado').classList.remove('d-none');
 
                     downloadImage(imageDataURL, 'soma');
                 };
@@ -210,7 +211,7 @@ function subtrairImagens() {
                         matrixSubt.push(row);
                     }
 
-                    var canvas = document.getElementById('canvasSubtracao');
+                    var canvas = document.getElementById('canvasResultado');
                     var ctx = canvas.getContext('2d');
 
                     canvas.width = maxWidth;
@@ -228,7 +229,7 @@ function subtrairImagens() {
 
                     var imageDataURL = canvas.toDataURL();
 
-                    document.querySelector('.subtracao').classList.remove('d-none');
+                    document.querySelector('.resultado').classList.remove('d-none');
                     downloadImage(imageDataURL, 'subtracao');
                 };
                 img2.src = evt2.target.result;
@@ -255,7 +256,7 @@ function flipLR() {
         var img = new Image();
 
         img.onload = function () {
-            var canvas = document.getElementById('canvasFlipLR');
+            var canvas = document.getElementById('canvasResultado');
             var ctx = canvas.getContext('2d');
             canvas.width = img.width;
             canvas.height = img.height;
@@ -289,7 +290,7 @@ function flipLR() {
             }
 
             var imageDataURL = canvas.toDataURL();
-            document.querySelector('.flipLR').classList.remove('d-none');
+            document.querySelector('.resultado').classList.remove('d-none');
             downloadImage(imageDataURL, 'flipLR');
         };
         img.src = dataURL;
@@ -311,7 +312,7 @@ function flipUD() {
         var img = new Image();
 
         img.onload = function () {
-            var canvas = document.getElementById('canvasFlipUD');
+            var canvas = document.getElementById('canvasResultado');
             var ctx = canvas.getContext('2d');
             canvas.width = img.width;
             canvas.height = img.height;
@@ -345,7 +346,7 @@ function flipUD() {
 
             var imageDataURL = canvas.toDataURL();
 
-            document.querySelector('.flipUD').classList.remove('d-none');
+            document.querySelector('.resultado').classList.remove('d-none');
             downloadImage(imageDataURL, 'flipUD');
         };
         img.src = dataURL;
@@ -379,7 +380,7 @@ function concatenarImagens() {
                     var widthRatio2 = maxWidth / img2.width;
                     var heightRatio2 = maxHeight / img2.height;
 
-                    var canvas = document.getElementById('canvasConcatenacao');
+                    var canvas = document.getElementById('canvasResultado');
                     var ctx = canvas.getContext('2d');
 
                     canvas.width = maxWidth * 2;
@@ -390,7 +391,7 @@ function concatenarImagens() {
 
                     var imageDataURL = canvas.toDataURL();
 
-                    document.querySelector('.concatenacao').classList.remove('d-none');
+                    document.querySelector('.resultado').classList.remove('d-none');
                     downloadImage(imageDataURL, 'concatenacao');
                 };
                 img2.src = evt2.target.result;
@@ -442,7 +443,7 @@ function recortarImagem() {
         var image = new Image();
         image.onload = function () {
 
-            var canvas = document.getElementById('canvasRecorte');
+            var canvas = document.getElementById('canvasResultado');
             var context = canvas.getContext('2d');
 
             width = colunaFinal !== undefined ? colunaFinal - colunaInicial : image.width - colunaInicial;
@@ -451,7 +452,7 @@ function recortarImagem() {
             canvas.height = height;
 
             context.drawImage(image, colunaInicial, linhaInicial, width, height, 0, 0, width, height);
-            document.querySelector('.recorte').classList.remove('d-none');
+            document.querySelector('.resultado').classList.remove('d-none');
 
             var imageDataURL = canvas.toDataURL();
             downloadImage(imageDataURL, 'recorte');
@@ -485,7 +486,7 @@ function limializarImagem() {
 
 
         img.onload = function () {
-            var canvas = document.getElementById('canvasLimiar');
+            var canvas = document.getElementById('canvasResultado');
             var ctx = canvas.getContext('2d');
             canvas.width = img.width;
             canvas.height = img.height;
@@ -525,7 +526,7 @@ function limializarImagem() {
                 }
             }
             var imageDataURL = canvas.toDataURL();
-            document.querySelector('.limiar').classList.remove('d-none');
+            document.querySelector('.resultado').classList.remove('d-none');
             downloadImage(imageDataURL, 'limiar');
         };
         img.src = dataURL;
@@ -533,6 +534,108 @@ function limializarImagem() {
     reader.readAsDataURL(input.files[0]);
 }
 
+function equalizarImagem() {
+    var input = document.getElementById('arquivoInput');
+    if (!input.files[0]) {
+        alert('Selecione uma imagem para processar.');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var dataURL = reader.result;
+
+        var img = new Image();
+
+        img.onload = function () {
+            var canvas = document.getElementById('canvasResultado');
+            var ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var histograma = calcularHistograma(imageData);
+            equalizarHistograma(imageData, histograma);
+
+            ctx.putImageData(imageData, 0, 0);
+
+            atualizarHistogramaGrafico(histograma);
+            
+            var imageDataURL = canvas.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'equalizacao');
+        };
+        img.src = dataURL;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+
+function atualizarHistogramaGrafico(histograma) {
+    if (window.chart) {
+        window.chart.destroy();
+    }
+    
+    var ctx = document.getElementById('histogramaCanvas').getContext('2d');
+    
+    window.chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Array.from({ length: 256 }, (_, i) => i.toString()),
+            datasets: [{
+                label: 'Pixel',
+                data: histograma,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    document.getElementById('histogramaCanvas').classList.remove('d-none');
+}
+
+
+function calcularHistograma(imageData) {
+    var pixels = imageData.data;
+    var histograma = new Array(256).fill(0);
+
+    for (var i = 0; i < pixels.length; i += 4) {
+        var intensidade = pixels[i];
+        histograma[intensidade]++;
+    }
+
+    return histograma;
+}
+
+function equalizarHistograma(imageData, histograma) {
+    var pixels = imageData.data;
+    var totalPixels = imageData.width * imageData.height;
+    var acumuladoHistograma = new Array(256).fill(0);
+
+
+    acumuladoHistograma[0] = histograma[0];
+    for (var i = 1; i < 256; i++) {
+        acumuladoHistograma[i] = acumuladoHistograma[i - 1] + histograma[i];
+    }
+
+
+    for (var i = 0; i < pixels.length; i += 4) {
+        var intensidade = pixels[i];
+        var novoValor = acumuladoHistograma[intensidade] * 255 / totalPixels;
+        pixels[i] = novoValor;
+        pixels[i + 1] = novoValor;
+        pixels[i + 2] = novoValor;
+    }
+}
 
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
     var canvas = document.createElement('canvas');
@@ -555,7 +658,7 @@ function resizeImageToMatchSize(image, maxWidth, maxHeight) {
 }
 
 function downloadImage(imageData, metodo) {
-    var link = document.querySelector('.' + metodo + ' #salvarImagem');
+    var link = document.querySelector('.resultado #salvarImagem');
     link.download = 'imagem_' + metodo + '.jpg';
     link.href = imageData;
 }

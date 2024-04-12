@@ -26,8 +26,7 @@
                 <div class="row d-none row-images pt-5">
                     <div class="col-md-6">
                         <h6>Primeira Imagem</h6>
-                        <img class="img-fluid" id="first-image" onclick="selectRegion(event)"
-                            style="cursor: crosshair;">
+                        <img class="img-fluid" id="first-image">
                     </div>
                     <div class="col-md-6">
                         <h6>Segunda Imagem</h6>
@@ -42,173 +41,27 @@
                     <button onclick="flipUD()" class="btn btn-primary">Flip Vertical</button>
                     <button onclick="concatenarImagens()" class="btn btn-primary">Concatenar Imagens</button>
                     <button onclick="recortarImagem()" class="btn btn-primary">Recortar</button>
-                    <button onclick="limializarImagem()" class="btn btn-primary">Limiar</button>
+                    <button onclick="limiarizarImagem()" class="btn btn-primary">Limiar</button>
+                    <button onclick="equalizarImagem()" class="btn btn-primary">Equalizar</button>
                 </div>
             </div>
         </div>
 
-        <div class="card inversao d-none mb-4">
+        <div class="card resultado d-none mb-4">
             <div class="card-header">
                 <div class="card-title">
-                    <h4>Inversão</h4>
-                </div>
-
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Resultado da Invertida</h5>
-                        <canvas id="canvasOutput" class="img-fluid"></canvas>
-                    </div>
-                    <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card soma d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Soma</h4>
+                    <h4>Resultado</h4>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-12 pt-3">
-                        <h5>Resultado da Soma</h5>
-                        <canvas id="canvasSoma" class="img-fluid"></canvas>
+                        <h5>Imagem Processada</h5>
+                        <canvas id="canvasResultado" class="img-fluid"></canvas>
+                        <canvas id="histogramaCanvas" class="img-fluid d-none"></canvas>
                     </div>
                     <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card subtracao d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Subtração</h4>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Resultado da Subtração</h5>
-                        <canvas id="canvasSubtracao" class="img-fluid"></canvas>
-                    </div>
-                    <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card flipLR d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Flip LR</h4>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Resultado da Flipada</h5>
-                        <canvas id="canvasFlipLR" class="img-fluid"></canvas>
-                    </div>
-                    <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card flipUD d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Flip UD</h4>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Resultado da Flipada</h5>
-                        <canvas id="canvasFlipUD" class="img-fluid"></canvas>
-                    </div>
-                    <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card concatenacao d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Concatenação</h4>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Resultado da Concatenação</h5>
-                        <canvas id="canvasConcatenacao" class="img-fluid"></canvas>
-                    </div>
-                    <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card recorte d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Recorte</h4>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Resultado do Recorte</h5>
-                        <canvas id="canvasRecorte" class="img-fluid"></canvas>
-                    </div>
-                    <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card limiar d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Limiar</h4>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Resultado da Limiar</h5>
-                        <canvas id="canvasLimiar" class="img-fluid"></canvas>
-                    </div>
-                    <div class="col-md-12 pt-3 text-end">
-
-                        <a class="btn btn-info text-light" id = "salvarImagem">Salvar Imagem</a>
-
+                        <a class="btn btn-info text-light" id="salvarImagem">Salvar Imagem</a>
                     </div>
                 </div>
             </div>
@@ -216,6 +69,7 @@
     </div>
 
     <script src="js/script.js"></script>
+    <script src="js/chart.js"></script>
 </body>
 
 </html>
