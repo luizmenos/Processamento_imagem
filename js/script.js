@@ -623,21 +623,32 @@ function calcularHistograma(imageData) {
 function equalizarHistograma(imageData, histograma) {
     var pixels = imageData.data;
     var totalPixels = imageData.width * imageData.height;
-    var acumuladoHistograma = new Array(256).fill(0);
+    var acumuladoHistogramaR = new Array(256).fill(0);
+    var acumuladoHistogramaG = new Array(256).fill(0);
+    var acumuladoHistogramaB = new Array(256).fill(0);
 
+    acumuladoHistogramaR[0] = histograma[0][0];
+    acumuladoHistogramaG[0] = histograma[0][1];
+    acumuladoHistogramaB[0] = histograma[0][2];
 
-    acumuladoHistograma[0] = histograma[0];
     for (var i = 1; i < 256; i++) {
-        acumuladoHistograma[i] = acumuladoHistograma[i - 1] + histograma[i];
+        acumuladoHistogramaR[i] = acumuladoHistogramaR[i - 1] + histograma[i][0];
+        acumuladoHistogramaG[i] = acumuladoHistogramaG[i - 1] + histograma[i][1];
+        acumuladoHistogramaB[i] = acumuladoHistogramaB[i - 1] + histograma[i][2];
     }
 
-
     for (var i = 0; i < pixels.length; i += 4) {
-        var intensidade = pixels[i];
-        var novoValor = acumuladoHistograma[intensidade] * 255 / totalPixels;
-        pixels[i] = novoValor;
-        pixels[i + 1] = novoValor;
-        pixels[i + 2] = novoValor;
+        var intensidadeR = pixels[i];
+        var intensidadeG = pixels[i + 1];
+        var intensidadeB = pixels[i + 2];
+        
+        var novoValorR = acumuladoHistogramaR[intensidadeR] * 255 / totalPixels;
+        var novoValorG = acumuladoHistogramaG[intensidadeG] * 255 / totalPixels;
+        var novoValorB = acumuladoHistogramaB[intensidadeB] * 255 / totalPixels;
+
+        pixels[i] = novoValorR;
+        pixels[i + 1] = novoValorG;
+        pixels[i + 2] = novoValorB;
     }
 }
 
