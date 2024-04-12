@@ -555,13 +555,15 @@ function equalizarImagem() {
             ctx.drawImage(img, 0, 0, img.width, img.height);
 
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            var histograma = calcularHistograma(imageData);
-            equalizarHistograma(imageData, histograma);
+            var histogramas = calcularHistograma(imageData);
+            console.log(histogramas);
+            equalizarHistograma(imageData, histogramas);
 
             ctx.putImageData(imageData, 0, 0);
 
-            atualizarHistogramaGrafico(histograma);
-            
+            atualizarHistogramaGrafico(histogramas);
+
+            console.log(histogramas);
             var imageDataURL = canvas.toDataURL();
             document.querySelector('.resultado').classList.remove('d-none');
             downloadImage(imageDataURL, 'equalizacao');
@@ -571,77 +573,47 @@ function equalizarImagem() {
     reader.readAsDataURL(input.files[0]);
 }
 
-
-function atualizarHistogramaGrafico(histograma) {
-    if (window.chart) {
-        window.chart.destroy();
-    }
-    
-    var ctx = document.getElementById('histogramaCanvas').getContext('2d');
-    
-    window.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Array.from({ length: 256 }, (_, i) => i.toString()),
-            datasets: [{
-                label: 'Pixel',
-                data: histograma,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    document.getElementById('histogramaCanvas').classList.remove('d-none');
-}
-
-
 function calcularHistograma(imageData) {
     var pixels = imageData.data;
-    var histograma = new Array(256).fill(0);
+    var histogramaR = Array.from({ length: 256 }, () => 0);
+    var histogramaG = Array.from({ length: 256 }, () => 0);
+    var histogramaB = Array.from({ length: 256 }, () => 0);
 
     for (var i = 0; i < pixels.length; i += 4) {
         var r = pixels[i];
         var g = pixels[i + 1];
         var b = pixels[i + 2];
 
-        var intensidade = Math.round((r + g + b) / 3);
-        histograma[intensidade]++;
+        histogramaR[r]++;
+        histogramaG[g]++;
+        histogramaB[b]++;
     }
 
-    return histograma;
+    return [histogramaR, histogramaG, histogramaB];
 }
 
-function equalizarHistograma(imageData, histograma) {
+function equalizarHistograma(imageData, histogramas) {
     var pixels = imageData.data;
     var totalPixels = imageData.width * imageData.height;
     var acumuladoHistogramaR = new Array(256).fill(0);
     var acumuladoHistogramaG = new Array(256).fill(0);
     var acumuladoHistogramaB = new Array(256).fill(0);
 
-    acumuladoHistogramaR[0] = histograma[0][0];
-    acumuladoHistogramaG[0] = histograma[0][1];
-    acumuladoHistogramaB[0] = histograma[0][2];
+    acumuladoHistogramaR[0] = histogramas[0][0];
+    acumuladoHistogramaG[0] = histogramas[1][0];
+    acumuladoHistogramaB[0] = histogramas[2][0];
 
     for (var i = 1; i < 256; i++) {
-        acumuladoHistogramaR[i] = acumuladoHistogramaR[i - 1] + histograma[i][0];
-        acumuladoHistogramaG[i] = acumuladoHistogramaG[i - 1] + histograma[i][1];
-        acumuladoHistogramaB[i] = acumuladoHistogramaB[i - 1] + histograma[i][2];
+        acumuladoHistogramaR[i] = acumuladoHistogramaR[i - 1] + histogramas[0][i];
+        acumuladoHistogramaG[i] = acumuladoHistogramaG[i - 1] + histogramas[1][i];
+        acumuladoHistogramaB[i] = acumuladoHistogramaB[i - 1] + histogramas[2][i];
     }
 
     for (var i = 0; i < pixels.length; i += 4) {
         var intensidadeR = pixels[i];
         var intensidadeG = pixels[i + 1];
         var intensidadeB = pixels[i + 2];
-        
+
         var novoValorR = acumuladoHistogramaR[intensidadeR] * 255 / totalPixels;
         var novoValorG = acumuladoHistogramaG[intensidadeG] * 255 / totalPixels;
         var novoValorB = acumuladoHistogramaB[intensidadeB] * 255 / totalPixels;
@@ -650,6 +622,57 @@ function equalizarHistograma(imageData, histograma) {
         pixels[i + 1] = novoValorG;
         pixels[i + 2] = novoValorB;
     }
+}
+
+
+function atualizarHistogramaGrafico(histogramas) {
+    if (window.chart) {
+        window.chart.destroy();
+    }
+
+    var ctx = document.getElementById('histogramaCanvas').getContext('2d');
+
+    window.chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Array.from({ length: 256 }, (_, i) => i.toString()),
+            datasets: [
+                {
+                    label: 'R',
+                    data: histogramas[0],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'G',
+                    data: histogramas[1],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'B',
+                    data: histogramas[2],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    ticks: { stepSize: 1 }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    document.getElementById('histogramaCanvas').classList.remove('d-none');
 }
 
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
