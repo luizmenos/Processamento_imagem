@@ -609,7 +609,11 @@ function calcularHistograma(imageData) {
     var histograma = new Array(256).fill(0);
 
     for (var i = 0; i < pixels.length; i += 4) {
-        var intensidade = pixels[i];
+        var r = pixels[i];
+        var g = pixels[i + 1];
+        var b = pixels[i + 2];
+
+        var intensidade = Math.round((r + g + b) / 3);
         histograma[intensidade]++;
     }
 
