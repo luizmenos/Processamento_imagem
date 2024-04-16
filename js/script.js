@@ -720,7 +720,7 @@ function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
             canvas.classList.remove('d-none');
         }
 
-
+cont++;
     })
 
 
@@ -756,13 +756,9 @@ function downloadImage(imageData, metodo) {
 function destroyCharts() {
     var quantGraficos = document.querySelectorAll('.canvasGrafico:not(.d-none)').length;
 
-
-    if (window.chartPre) {
+    if (quantGraficos >= 2) {
         window.chartPre.destroy();
-    }
-    if (window.chartPos) {
         window.chartPos.destroy();
     }
-
 
 }
