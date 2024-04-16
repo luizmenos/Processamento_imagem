@@ -535,6 +535,7 @@ function limializarImagem() {
 }
 
 function equalizarImagem() {
+
     var input = document.getElementById('arquivoInput');
     if (!input.files[0]) {
         alert('Selecione uma imagem para processar.');
@@ -555,18 +556,19 @@ function equalizarImagem() {
             ctx.drawImage(img, 0, 0, img.width, img.height);
 
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            var histogramas = calcularHistograma(imageData);
-            console.log(histogramas);
-            equalizarHistograma(imageData, histogramas);
+            var histogramasPre = calcularHistograma(imageData);
+
+            equalizarHistograma(imageData, histogramasPre);
 
             ctx.putImageData(imageData, 0, 0);
 
-            atualizarHistogramaGrafico(histogramas);
+            var histogramasPos = calcularHistograma(imageData);
+            atualizarHistogramaGrafico(histogramasPre, histogramasPos);
 
-            console.log(histogramas);
             var imageDataURL = canvas.toDataURL();
             document.querySelector('.resultado').classList.remove('d-none');
             downloadImage(imageDataURL, 'equalizacao');
+
         };
         img.src = dataURL;
     };
@@ -625,54 +627,104 @@ function equalizarHistograma(imageData, histogramas) {
 }
 
 
-function atualizarHistogramaGrafico(histogramas) {
-    if (window.chart) {
-        window.chart.destroy();
-    }
-
-    var ctx = document.getElementById('histogramaCanvas').getContext('2d');
-
-    window.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Array.from({ length: 256 }, (_, i) => i.toString()),
-            datasets: [
-                {
-                    label: 'R',
-                    data: histogramas[0],
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
+function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
+    destroyCharts();
+    var cont = 0;
+    document.querySelectorAll('canvas[id^="histogramaCanvas"]').forEach((canvas) => {
+        var ctx = canvas.getContext('2d');
+        if (cont == 0) {
+            var histogramas = histogramaPre;
+            window.chartPre = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({ length: 256 }, (_, i) => i.toString()),
+                    datasets: [
+                        {
+                            label: 'R',
+                            data: histogramas[0],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'G',
+                            data: histogramas[1],
+                            backgroundColor: 'rgba(75, 255, 192, 0.2)',
+                            borderColor: 'rgba(75, 255, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'B',
+                            data: histogramas[2],
+                            backgroundColor: 'rgba(54, 162, 255, 0.2)',
+                            borderColor: 'rgba(54, 162, 255, 1)',
+                            borderWidth: 1
+                        }
+                    ]
                 },
-                {
-                    label: 'G',
-                    data: histogramas[1],
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'B',
-                    data: histogramas[2],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
+                options: {
+                    scales: {
+                        x: {
+                            ticks: { stepSize: 1 }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    ticks: { stepSize: 1 }
+
+            });
+            canvas.classList.remove('d-none');
+        } else {
+            var histogramas = histogramaPos;
+            window.chartPos = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({ length: 256 }, (_, i) => i.toString()),
+                    datasets: [
+                        {
+                            label: 'R',
+                            data: histogramas[0],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'G',
+                            data: histogramas[1],
+                            backgroundColor: 'rgba(75, 255, 192, 0.2)',
+                            borderColor: 'rgba(75, 255, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'B',
+                            data: histogramas[2],
+                            backgroundColor: 'rgba(54, 162, 255, 0.2)',
+                            borderColor: 'rgba(54, 162, 255, 1)',
+                            borderWidth: 1
+                        }
+                    ]
                 },
-                y: {
-                    beginAtZero: true
+                options: {
+                    scales: {
+                        x: {
+                            ticks: { stepSize: 1 }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
-            }
+
+            });
+            canvas.classList.remove('d-none');
         }
-    });
 
-    document.getElementById('histogramaCanvas').classList.remove('d-none');
+
+    })
+
+
+
 }
 
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
@@ -699,4 +751,18 @@ function downloadImage(imageData, metodo) {
     var link = document.querySelector('.resultado #salvarImagem');
     link.download = 'imagem_' + metodo + '.jpg';
     link.href = imageData;
+}
+
+function destroyCharts() {
+    var quantGraficos = document.querySelectorAll('.canvasGrafico:not(.d-none)').length;
+
+
+    if (window.chartPre) {
+        window.chartPre.destroy();
+    }
+    if (window.chartPos) {
+        window.chartPos.destroy();
+    }
+
+
 }

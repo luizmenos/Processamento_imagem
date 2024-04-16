@@ -15,11 +15,11 @@
                 <div class="row">
                     <div class="col-md-6">
                         <input type="file" class="form-control" id="arquivoInput"
-                            accept="image/*,.png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem1(event)">
+                            accept=".png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem1(event)">
                     </div>
 
                     <div class="col-md-6">
-                        <input type="file" class="form-control" id="arquivoInput2" accept="image/*"
+                        <input type="file" class="form-control" id="arquivoInput2" accept=".png,.jpg,.jpeg,.gif,.bmp,.webp"
                             onchange="imagem2(event)">
                     </div>
                 </div>
@@ -58,7 +58,12 @@
                     <div class="col-md-12 pt-3">
                         <h5>Imagem Processada</h5>
                         <canvas id="canvasResultado" class="img-fluid"></canvas>
-                        <canvas id="histogramaCanvas" class="img-fluid d-none"></canvas>
+                    </div>
+                    <div class="col-md-12">
+                        <canvas id="histogramaCanvasPre" class="img-fluid d-none canvasGrafico"></canvas>
+                    </div>
+                    <div class="col-md-12">
+                        <canvas id="histogramaCanvasPos" class="img-fluid d-none canvasGrafico"></canvas>
                     </div>
                     <div class="col-md-12 pt-3 text-end">
                         <a class="btn btn-info text-light" id="salvarImagem">Salvar Imagem</a>
