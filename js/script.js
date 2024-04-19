@@ -120,9 +120,26 @@ function somarImagens() {
                         var row = [];
                         for (var x = 0; x < maxWidth; x++) {
                             var index = (y * maxWidth + x) * 4;
-                            var r = Math.max(0, Math.min(255, pixels1[index] + pixels2[index]));
-                            var g = Math.max(0, Math.min(255, pixels1[index + 1] + pixels2[index + 1]));
-                            var b = Math.max(0, Math.min(255, pixels1[index + 2] + pixels2[index + 2]));
+
+                            var f1 = pixels1[index] + pixels2[index];
+                            var f2 = pixels1[index + 1] + pixels2[index + 1];
+                            var f3 = pixels1[index + 2] + pixels2[index + 2];
+
+                            var f_min = 0;
+                            var f_max = 255;
+
+                            var r = (255 / (f_max - f_min)) * (f1 - f_min);
+                            var g = (255 / (f_max - f_min)) * (f2 - f_min);
+                            var b = (255 / (f_max - f_min)) * (f3 - f_min);
+
+
+                            r = Math.round(r);
+                            g = Math.round(g);
+                            b = Math.round(b);
+
+                            //var r = Math.max(0, Math.min(255, pixels1[index] + pixels2[index]));
+                            // var g = Math.max(0, Math.min(255, pixels1[index + 1] + pixels2[index + 1]));
+                            //var b = Math.max(0, Math.min(255, pixels1[index + 2] + pixels2[index + 2]));
                             row.push([r, g, b]);
                         }
                         matrixSubt.push(row);
@@ -203,9 +220,26 @@ function subtrairImagens() {
                         var row = [];
                         for (var x = 0; x < maxWidth; x++) {
                             var index = (y * maxWidth + x) * 4;
-                            var r = Math.max(0, Math.min(255, pixels1[index] - pixels2[index]));
-                            var g = Math.max(0, Math.min(255, pixels1[index + 1] - pixels2[index + 1]));
-                            var b = Math.max(0, Math.min(255, pixels1[index + 2] - pixels2[index + 2]));
+
+                            var f1 = pixels1[index] - pixels2[index];
+                            var f2 = pixels1[index + 1] - pixels2[index + 1];
+                            var f3 = pixels1[index + 2] - pixels2[index + 2];
+
+                            var f_min = 0;
+                            var f_max = 255;
+
+                            var r = (255 / (f_max - f_min)) * (f1 - f_min);
+                            var g = (255 / (f_max - f_min)) * (f2 - f_min);
+                            var b = (255 / (f_max - f_min)) * (f3 - f_min);
+
+
+                            r = Math.round(r);
+                            g = Math.round(g);
+                            b = Math.round(b);
+
+                            //    var r = Math.max(0, Math.min(255, pixels1[index] - pixels2[index]));
+                            //   var g = Math.max(0, Math.min(255, pixels1[index + 1] - pixels2[index + 1]));
+                            //  var b = Math.max(0, Math.min(255, pixels1[index + 2] - pixels2[index + 2]));
                             row.push([r, g, b]);
                         }
                         matrixSubt.push(row);
@@ -418,7 +452,7 @@ function recortarImagem() {
     colunas = colunas.split(':');
 
     if (linhas.length !== 2 || colunas.length !== 2) {
-        alert("Por favor, insira um intervalo válido para linhas e colunas.");
+        alert("Por favor, insira um intervalo vÃ¡lido para linhas e colunas.");
         return false;
     }
 
@@ -431,10 +465,10 @@ function recortarImagem() {
     var colunaFinal = colunas[1] === "" ? undefined : parseInt(colunas[1]);
 
     if (linhaFinal != undefined & linhaInicial != 0) {
-        if (linhaInicial > linhaFinal) { alert("Por favor, insira um intervalo válido para linhas."); return false; }
+        if (linhaInicial > linhaFinal) { alert("Por favor, insira um intervalo vÃ¡lido para linhas."); return false; }
     }
     if (colunaFinal != undefined & colunaInicial != 0) {
-        if (colunaInicial > colunaFinal) { alert("Por favor, insira um intervalo válido para colunas."); return false; }
+        if (colunaInicial > colunaFinal) { alert("Por favor, insira um intervalo vÃ¡lido para colunas."); return false; }
     }
 
 
@@ -471,10 +505,10 @@ function limializarImagem() {
         return;
     }
 
-    var inputNumber = prompt("Insira o valor do limiar, sendo de 0 à 255");
+    var inputNumber = prompt("Insira o valor do limiar, sendo de 0 Ã  255");
     var limiar = parseInt(inputNumber);
     if (isNaN(limiar) || (limiar > 255 || limiar < 0)) {
-        alert('Digite um número válido.');
+        alert('Digite um nÃºmero vÃ¡lido.');
         return;
     }
 
@@ -663,6 +697,12 @@ function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
                     ]
                 },
                 options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Pr\u{00E9}-Equaliza\u{00E7}\u{00E3}o'
+                        }
+                    },
                     scales: {
                         x: {
                             ticks: { stepSize: 1 }
@@ -706,6 +746,12 @@ function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
                     ]
                 },
                 options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'P\u{00F3}s-Equaliza\u{00E7}\u{00E3}o'
+                        }
+                    },
                     scales: {
                         x: {
                             ticks: { stepSize: 1 }
@@ -720,7 +766,7 @@ function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
             canvas.classList.remove('d-none');
         }
 
-cont++;
+        cont++;
     })
 
 
