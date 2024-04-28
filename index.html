@@ -19,8 +19,8 @@
                     </div>
 
                     <div class="col-md-6">
-                        <input type="file" class="form-control" id="arquivoInput2" accept=".png,.jpg,.jpeg,.gif,.bmp,.webp"
-                            onchange="imagem2(event)">
+                        <input type="file" class="form-control" id="arquivoInput2"
+                            accept=".png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem2(event)">
                     </div>
                 </div>
                 <div class="row d-none row-images pt-5">
@@ -34,19 +34,25 @@
                     </div>
                 </div>
                 <div class="col-md-12 pt-3">
-                    <button onclick="inverterImagem()" class="btn btn-primary">Inverter</button>
-                    <button onclick="somarImagens()" class="btn btn-primary">Somar</button>
-                    <button onclick="subtrairImagens()" class="btn btn-primary">Subtrair</button>
-                    <button onclick="flipLR()" class="btn btn-primary">Flip Horizontal</button>
-                    <button onclick="flipUD()" class="btn btn-primary">Flip Vertical</button>
-                    <button onclick="concatenarImagens()" class="btn btn-primary">Concatenar Imagens</button>
-                    <button onclick="recortarImagem()" class="btn btn-primary">Recortar</button>
-                    <button onclick="limializarImagem()" class="btn btn-primary">Limiar</button>
-                    <button onclick="equalizarImagem()" class="btn btn-primary">Equalizar</button>
-                    <button onclick="and()" class="btn btn-primary">AND</button>
-                    <button onclick="or()" class="btn btn-primary">OR</button>
-                    <button onclick="not()" class="btn btn-primary">NOT</button>
-                    <button onclick="xor()" class="btn btn-primary">XOR</button>
+                    <div class="btn-group" role="group" aria-label="Operações Lógicas">
+                        <button onclick="and()" class="btn btn-primary">AND</button>
+                        <button onclick="or()" class="btn btn-primary">OR</button>
+                        <button onclick="not()" class="btn btn-primary">NOT</button>
+                        <button onclick="xor()" class="btn btn-primary">XOR</button>
+                    </div>
+                    <div class="btn-group" role="group" aria-label="Operações Aritméticas">
+                        <button onclick="inverterImagem()" class="btn btn-primary">Inverter</button>
+                        <button onclick="somarImagens()" class="btn btn-primary">Somar</button>
+                        <button onclick="subtrairImagens()" class="btn btn-primary">Subtrair</button>
+                    </div>
+                    <div class="btn-group" role="group" aria-label="Outras Funções">
+                        <button onclick="flipLR()" class="btn btn-primary">Flip Horizontal</button>
+                        <button onclick="flipUD()" class="btn btn-primary">Flip Vertical</button>
+                        <button onclick="concatenarImagens()" class="btn btn-primary">Concatenar Imagens</button>
+                        <button onclick="recortarImagem()" class="btn btn-primary">Recortar</button>
+                        <button onclick="limializarImagem()" class="btn btn-primary">Limiar</button>
+                        <button onclick="equalizarImagem()" class="btn btn-primary">Equalizar</button>
+                    </div>
                 </div>
             </div>
         </div>

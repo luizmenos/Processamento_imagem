@@ -610,12 +610,11 @@ function equalizarImagem() {
 }
 
 function and() {
-
     var input1 = document.getElementById('arquivoInput').files[0];
     var input2 = document.getElementById('arquivoInput2').files[0];
 
     if (!input1 || !input2) {
-        alert('Selecione duas imagens para somar.');
+        alert('Selecione duas imagens para realizar a operação lógica AND.');
         return;
     }
 
@@ -644,41 +643,22 @@ function and() {
                     var pixels1 = imageData1.data;
                     var pixels2 = imageData2.data;
 
-                    var matrixSubt = [];
+                    var matrixAnd = [];
                     for (var y = 0; y < maxHeight; y++) {
                         var row = [];
                         for (var x = 0; x < maxWidth; x++) {
                             var index = (y * maxWidth + x) * 4;
 
-                            var gray1 = (pixels1[index] + pixels1[index + 1] + pixels1[index + 2]) / 3;
-                            var gray2 = (pixels2[index] + pixels2[index + 1] + pixels2[index + 2]) / 3;
-                            
-                            if (gray1 >= 128) {
-                                gray1 = 255;
-                            } else {
-                                gray1 = 0;
-                            }
-                            
-                            if (gray2 >= 128) {
-                                gray2 = 255;
-                            } else {
-                                gray2 = 0;
-                            }
-
-                            var f = gray1 + gray2;
-
-                            var f_min = 0;
-                            var f_max = 255;
-
-                            var grey = (255 / (f_max - f_min)) * (f - f_min);
+                            var pixel1 = (pixels1[index] + pixels1[index + 1] + pixels1[index + 2]) / 3 >= 128 ? 255 : 0;
+                            var pixel2 = (pixels2[index] + pixels2[index + 1] + pixels2[index + 2]) / 3 >= 128 ? 255 : 0;
 
 
-                            grey = Math.round(grey);
-                            row.push([grey, grey, grey]);
+                            var resultPixel = pixel1 & pixel2;
+
+                            row.push([resultPixel, resultPixel, resultPixel]);
                         }
-                        matrixSubt.push(row);
+                        matrixAnd.push(row);
                     }
-
 
                     var canvas = document.getElementById('canvasResultado');
                     var ctx = canvas.getContext('2d');
@@ -689,16 +669,14 @@ function and() {
                     ctx.clearRect(0, 0, maxWidth, maxHeight);
                     for (var y = 0; y < maxHeight; y++) {
                         for (var x = 0; x < maxWidth; x++) {
-                            var pixel = matrixSubt[y][x];
+                            var pixel = matrixAnd[y][x];
                             ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
                             ctx.fillRect(x, y, 1, 1);
                         }
                     }
-                    var imageDataURL = canvas.toDataURL();
 
                     document.querySelector('.resultado').classList.remove('d-none');
-
-                    downloadImage(imageDataURL, 'and');
+                    downloadImage(canvas.toDataURL(), 'and');
                 };
 
                 img2.src = evt2.target.result;
@@ -714,9 +692,91 @@ function and() {
 }
 
 
-function or() {
 
+
+
+function or() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+    var input2 = document.getElementById('arquivoInput2').files[0];
+
+    if (!input1 || !input2) {
+        alert('Selecione duas imagens para realizar a operação lógica OR.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+    var reader2 = new FileReader();
+
+    reader1.onload = function (evt) {
+        reader2.onload = function (evt2) {
+            var img1 = new Image();
+            var img2 = new Image();
+
+            img1.onload = function () {
+                img2.onload = function () {
+                    var maxWidth = Math.max(img1.width, img2.width);
+                    var maxHeight = Math.max(img1.height, img2.height);
+
+                    var resizedImage1 = resizeImageToMatchSize(img1, maxWidth, maxHeight);
+                    var resizedImage2 = resizeImageToMatchSize(img2, maxWidth, maxHeight);
+
+                    var ctx1 = resizedImage1.getContext('2d');
+                    var ctx2 = resizedImage2.getContext('2d');
+
+                    var imageData1 = ctx1.getImageData(0, 0, maxWidth, maxHeight);
+                    var imageData2 = ctx2.getImageData(0, 0, maxWidth, maxHeight);
+
+                    var pixels1 = imageData1.data;
+                    var pixels2 = imageData2.data;
+
+                    var matrixOr = [];
+                    for (var y = 0; y < maxHeight; y++) {
+                        var row = [];
+                        for (var x = 0; x < maxWidth; x++) {
+                            var index = (y * maxWidth + x) * 4;
+
+                            var pixel1 = (pixels1[index] + pixels1[index + 1] + pixels1[index + 2]) / 3 >= 128 ? 255 : 0;
+                            var pixel2 = (pixels2[index] + pixels2[index + 1] + pixels2[index + 2]) / 3 >= 128 ? 255 : 0;
+
+                            var resultPixel = pixel1 | pixel2;
+
+                            row.push([resultPixel, resultPixel, resultPixel]);
+                        }
+                        matrixOr.push(row);
+                    }
+
+                    var canvas = document.getElementById('canvasResultado');
+                    var ctx = canvas.getContext('2d');
+
+                    canvas.width = maxWidth;
+                    canvas.height = maxHeight;
+
+                    ctx.clearRect(0, 0, maxWidth, maxHeight);
+                    for (var y = 0; y < maxHeight; y++) {
+                        for (var x = 0; x < maxWidth; x++) {
+                            var pixel = matrixOr[y][x];
+                            ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+
+                    document.querySelector('.resultado').classList.remove('d-none');
+                    downloadImage(canvas.toDataURL(), 'or');
+                };
+
+                img2.src = evt2.target.result;
+            };
+
+            img1.src = evt.target.result;
+        };
+
+        reader2.readAsDataURL(input2);
+    };
+
+    reader1.readAsDataURL(input1);
 }
+
+
 function not() {
     var input = document.getElementById('arquivoInput');
     if (!input.files[0]) {
@@ -777,7 +837,84 @@ function not() {
 }
 
 function xor() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+    var input2 = document.getElementById('arquivoInput2').files[0];
 
+    if (!input1 || !input2) {
+        alert('Selecione duas imagens para realizar a operação lógica OR.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+    var reader2 = new FileReader();
+
+    reader1.onload = function (evt) {
+        reader2.onload = function (evt2) {
+            var img1 = new Image();
+            var img2 = new Image();
+
+            img1.onload = function () {
+                img2.onload = function () {
+                    var maxWidth = Math.max(img1.width, img2.width);
+                    var maxHeight = Math.max(img1.height, img2.height);
+
+                    var resizedImage1 = resizeImageToMatchSize(img1, maxWidth, maxHeight);
+                    var resizedImage2 = resizeImageToMatchSize(img2, maxWidth, maxHeight);
+
+                    var ctx1 = resizedImage1.getContext('2d');
+                    var ctx2 = resizedImage2.getContext('2d');
+
+                    var imageData1 = ctx1.getImageData(0, 0, maxWidth, maxHeight);
+                    var imageData2 = ctx2.getImageData(0, 0, maxWidth, maxHeight);
+
+                    var pixels1 = imageData1.data;
+                    var pixels2 = imageData2.data;
+
+                    var matrixOr = [];
+                    for (var y = 0; y < maxHeight; y++) {
+                        var row = [];
+                        for (var x = 0; x < maxWidth; x++) {
+                            var index = (y * maxWidth + x) * 4;
+
+                            var pixel1 = (pixels1[index] + pixels1[index + 1] + pixels1[index + 2]) / 3 >= 128 ? 255 : 0;
+                            var pixel2 = (pixels2[index] + pixels2[index + 1] + pixels2[index + 2]) / 3 >= 128 ? 255 : 0;
+
+                            var resultPixel = pixel1 ^ pixel2;
+
+                            row.push([resultPixel, resultPixel, resultPixel]);
+                        }
+                        matrixOr.push(row);
+                    }
+
+                    var canvas = document.getElementById('canvasResultado');
+                    var ctx = canvas.getContext('2d');
+
+                    canvas.width = maxWidth;
+                    canvas.height = maxHeight;
+
+                    ctx.clearRect(0, 0, maxWidth, maxHeight);
+                    for (var y = 0; y < maxHeight; y++) {
+                        for (var x = 0; x < maxWidth; x++) {
+                            var pixel = matrixOr[y][x];
+                            ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+
+                    document.querySelector('.resultado').classList.remove('d-none');
+                    downloadImage(canvas.toDataURL(), 'or');
+                };
+
+                img2.src = evt2.target.result;
+            };
+
+            img1.src = evt.target.result;
+        };
+
+        reader2.readAsDataURL(input2);
+    };
+
+    reader1.readAsDataURL(input1);
 }
 
 function calcularHistograma(imageData) {
