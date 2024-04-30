@@ -179,6 +179,83 @@ function somarImagens() {
     reader1.readAsDataURL(input1);
 }
 
+function somarConst() {
+    var input = document.getElementById('arquivoInput');
+    if (!input.files[0]) {
+        alert('Selecione uma imagem para processar.');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o valor para somar, sendo de 0 a 255");
+    var somar = parseInt(inputNumber);
+    if (isNaN(somar) || (somar > 255 || somar < 0)) {
+        alert('Digite um número válido.');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var dataURL = reader.result;
+
+
+        var img = new Image();
+
+        img.onload = function () {
+            var canvas = document.getElementById('canvasResultado');
+            var ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var pixels = imageData.data;
+
+            var matrixSubt = [];
+            for (var y = 0; y < canvas.height; y++) {
+                var row = [];
+                for (var x = 0; x < canvas.width; x++) {
+                    var index = (y * canvas.width + x) * 4;
+
+                    var f1 = pixels[index] + somar;
+                    var f2 = pixels[index + 1] + somar;
+                    var f3 = pixels[index + 2] + somar;
+
+                    var f_min = 0;
+                    var f_max = 255;
+
+                    var r = (255 / (f_max - f_min)) * (f1 - f_min);
+                    var g = (255 / (f_max - f_min)) * (f2 - f_min);
+                    var b = (255 / (f_max - f_min)) * (f3 - f_min);
+
+
+                    r = Math.round(r);
+                    g = Math.round(g);
+                    b = Math.round(b);
+
+                    row.push([r, g, b]);
+                }
+                matrixSubt.push(row);
+            }
+
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var y = 0; y < canvas.height; y++) {
+                for (var x = 0; x < canvas.width; x++) {
+                    var pixel = matrixSubt[y][x];
+                    ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvas.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'somarConst');
+        };
+        img.src = dataURL;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
 function subtrairImagens() {
     var input1 = document.getElementById('arquivoInput').files[0];
     var input2 = document.getElementById('arquivoInput2').files[0];
@@ -273,6 +350,83 @@ function subtrairImagens() {
         reader2.readAsDataURL(input2);
     };
     reader1.readAsDataURL(input1);
+}
+
+function subtrairConst() {
+    var input = document.getElementById('arquivoInput');
+    if (!input.files[0]) {
+        alert('Selecione uma imagem para processar.');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o valor para subtrair, sendo de 0 a 255");
+    var sub = parseInt(inputNumber);
+    if (isNaN(sub) || (sub > 255 || sub < 0)) {
+        alert('Digite um número válido.');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var dataURL = reader.result;
+
+
+        var img = new Image();
+
+        img.onload = function () {
+            var canvas = document.getElementById('canvasResultado');
+            var ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var pixels = imageData.data;
+
+            var matrixSubt = [];
+            for (var y = 0; y < canvas.height; y++) {
+                var row = [];
+                for (var x = 0; x < canvas.width; x++) {
+                    var index = (y * canvas.width + x) * 4;
+
+                    var f1 = pixels[index] - sub;
+                    var f2 = pixels[index + 1] - sub;
+                    var f3 = pixels[index + 2] - sub;
+
+                    var f_min = 0;
+                    var f_max = 255;
+
+                    var r = (255 / (f_max - f_min)) * (f1 - f_min);
+                    var g = (255 / (f_max - f_min)) * (f2 - f_min);
+                    var b = (255 / (f_max - f_min)) * (f3 - f_min);
+
+
+                    r = Math.round(r);
+                    g = Math.round(g);
+                    b = Math.round(b);
+
+                    row.push([r, g, b]);
+                }
+                matrixSubt.push(row);
+            }
+
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var y = 0; y < canvas.height; y++) {
+                for (var x = 0; x < canvas.width; x++) {
+                    var pixel = matrixSubt[y][x];
+                    ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvas.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'somarConst');
+        };
+        img.src = dataURL;
+    };
+    reader.readAsDataURL(input.files[0]);
 }
 
 function flipLR() {
@@ -691,10 +845,6 @@ function and() {
     reader1.readAsDataURL(input1);
 }
 
-
-
-
-
 function or() {
     var input1 = document.getElementById('arquivoInput').files[0];
     var input2 = document.getElementById('arquivoInput2').files[0];
@@ -775,7 +925,6 @@ function or() {
 
     reader1.readAsDataURL(input1);
 }
-
 
 function not() {
     var input = document.getElementById('arquivoInput');
@@ -967,7 +1116,6 @@ function equalizarHistograma(imageData, histogramas) {
         pixels[i + 2] = novoValorB;
     }
 }
-
 
 function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
     destroyCharts();
