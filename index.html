@@ -33,60 +33,68 @@
                         <img class="img-fluid" id="second-image">
                     </div>
                 </div>
-                <div class="col-md-12 pt-3">
-                    <div class="btn-group" role="group" aria-label="Operações Lógicas">
-                        <button onclick="and()" class="btn btn-primary">AND</button>
-                        <button onclick="or()" class="btn btn-primary">OR</button>
-                        <button onclick="not()" class="btn btn-primary">NOT</button>
-                        <button onclick="xor()" class="btn btn-primary">XOR</button>
-                    </div>
-                    <div class="btn-group" role="group" aria-label="Operações Aritméticas">
-                        <button onclick="inverterImagem()" class="btn btn-primary">Inverter</button>
-                        <button onclick="somarImagens()" class="btn btn-primary">Somar</button>
-                        <button onclick="somarConst()" class="btn btn-primary">Somar Const</button>
-                        <button onclick="subtrairImagens()" class="btn btn-primary">Subtrair</button>
-                        <button onclick="subtrairConst()" class="btn btn-primary">Subtrair Const</button>
-                    </div>
-                    <div class="btn-group" role="group" aria-label="Outras Funções">
-                        <button onclick="flipLR()" class="btn btn-primary">Flip Horizontal</button>
-                        <button onclick="flipUD()" class="btn btn-primary">Flip Vertical</button>
-                        <button onclick="concatenarImagens()" class="btn btn-primary">Concatenar Imagens</button>
-                        <button onclick="recortarImagem()" class="btn btn-primary">Recortar</button>
-                        <button onclick="limializarImagem()" class="btn btn-primary">Limiar</button>
-                        <button onclick="equalizarImagem()" class="btn btn-primary">Equalizar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card resultado d-none mb-4">
-            <div class="card-header">
-                <div class="card-title">
-                    <h4>Resultado</h4>
-                </div>
-            </div>
-            <div class="card-body">
                 <div class="row">
-                    <div class="col-md-12 pt-3">
-                        <h5>Imagem Processada</h5>
-                        <canvas id="canvasResultado" class="img-fluid"></canvas>
+                    <div class="col-md-12 pt-3 pb-3">
+                        <div class="btn-group" role="group" aria-label="Operações Lógicas">
+                            <button onclick="and()" class="btn btn-primary">AND</button>
+                            <button onclick="or()" class="btn btn-primary">OR</button>
+                            <button onclick="not()" class="btn btn-primary">NOT</button>
+                            <button onclick="xor()" class="btn btn-primary">XOR</button>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Operações Aritméticas">
+                            <button onclick="inverterImagem()" class="btn btn-primary">Inverter</button>
+                            <button onclick="somarImagens()" class="btn btn-primary">Somar</button>
+                            <button onclick="somarConst()" class="btn btn-primary">Somar Const</button>
+                            <button onclick="subtrairImagens()" class="btn btn-primary">Subtrair</button>
+                            <button onclick="subtrairConst()" class="btn btn-primary">Subtrair Const</button>
+                            <button onclick="dividirImagem()" class="btn btn-primary">Dividir</button>
+                            <button onclick="multiplicarImagem()" class="btn btn-primary">Multiplicar</button>
+
+                        </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-12">
-                        <canvas id="histogramaCanvasPre" class="img-fluid d-none canvasGrafico"></canvas>
+                        <div class="btn-group" role="group" aria-label="Outras Funções">
+                            <button onclick="flipLR()" class="btn btn-primary">Flip Horizontal</button>
+                            <button onclick="flipUD()" class="btn btn-primary">Flip Vertical</button>
+                            <button onclick="concatenarImagens()" class="btn btn-primary">Concatenar Imagens</button>
+                            <button onclick="recortarImagem()" class="btn btn-primary">Recortar</button>
+                            <button onclick="limializarImagem()" class="btn btn-primary">Limiar</button>
+                            <button onclick="equalizarImagem()" class="btn btn-primary">Equalizar</button>
+                        </div>
                     </div>
-                    <div class="col-md-12">
-                        <canvas id="histogramaCanvasPos" class="img-fluid d-none canvasGrafico"></canvas>
+                </div>
+            </div>
+
+            <div class="card resultado d-none mb-4">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h4>Resultado</h4>
                     </div>
-                    <div class="col-md-12 pt-3 text-end">
-                        <a class="btn btn-info text-light" id="salvarImagem">Salvar Imagem</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 pt-3">
+                            <h5>Imagem Processada</h5>
+                            <canvas id="canvasResultado" class="img-fluid"></canvas>
+                        </div>
+                        <div class="col-md-12">
+                            <canvas id="histogramaCanvasPre" class="img-fluid d-none canvasGrafico"></canvas>
+                        </div>
+                        <div class="col-md-12">
+                            <canvas id="histogramaCanvasPos" class="img-fluid d-none canvasGrafico"></canvas>
+                        </div>
+                        <div class="col-md-12 pt-3 text-end">
+                            <a class="btn btn-info text-light" id="salvarImagem">Salvar Imagem</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="js/script.js"></script>
-    <script src="js/chart.js"></script>
+        <script src="js/script.js"></script>
+        <script src="js/chart.js"></script>
 </body>
 
 </html>
