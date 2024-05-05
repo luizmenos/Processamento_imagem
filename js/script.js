@@ -841,7 +841,7 @@ function xor() {
     var input2 = document.getElementById('arquivoInput2').files[0];
 
     if (!input1 || !input2) {
-        alert('Selecione duas imagens para realizar a operação lógica OR.');
+        alert('Selecione duas imagens para realizar a operação lógica XOR.');
         return;
     }
 
@@ -1202,6 +1202,99 @@ function subtrairConst() {
         img.src = dataURL;
     };
     reader.readAsDataURL(input.files[0]);
+}
+
+function blendImagem() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+    var input2 = document.getElementById('arquivoInput2').files[0];
+
+    if (!input1 || !input2) {
+        alert('Selecione duas imagens para aplicar a Combinação Linear.');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o valor para a Taxa de Mistura, sendo de 0.0 a 1.0");
+    var sub = parseFloat(inputNumber);
+    if (isNaN(sub) || (sub > 1 || sub < 0)) {
+        alert('Digite um número válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+    var reader2 = new FileReader();
+
+    reader1.onload = function (evt) {
+        reader2.onload = function (evt2) {
+            var img1 = new Image();
+            var img2 = new Image();
+
+            img1.onload = function () {
+                img2.onload = function () {
+
+
+                    var maxWidth = Math.max(img1.width, img2.width);
+                    var maxHeight = Math.max(img1.height, img2.height);
+
+                    var resizedImage1 = resizeImageToMatchSize(img1, maxWidth, maxHeight);
+                    var resizedImage2 = resizeImageToMatchSize(img2, maxWidth, maxHeight);
+
+                    var ctx1 = resizedImage1.getContext('2d');
+                    var ctx2 = resizedImage2.getContext('2d');
+
+                    var imageData1 = ctx1.getImageData(0, 0, maxWidth, maxHeight);
+                    var imageData2 = ctx2.getImageData(0, 0, maxWidth, maxHeight);
+
+                    var pixels1 = imageData1.data;
+                    var pixels2 = imageData2.data;
+
+                    var matrixSubt = [];
+                    for (var y = 0; y < maxHeight; y++) {
+                        var row = [];
+                        for (var x = 0; x < maxWidth; x++) {
+                            var index = (y * maxWidth + x) * 4;
+
+                            r = sub * pixels1[index] + (1 - sub) * pixels2[index];
+                            g = sub * pixels1[index + 1] + (1 - sub) * pixels2[index + 1];
+                            b = sub * pixels1[index + 2] + (1 - sub) * pixels2[index + 2];
+
+                            r = Math.round(r);
+                            g = Math.round(g);
+                            b = Math.round(b);
+
+
+                            row.push([r, g, b]);
+                        }
+                        matrixSubt.push(row);
+                    }
+
+                    var canvas = document.getElementById('canvasResultado');
+                    var ctx = canvas.getContext('2d');
+
+                    canvas.width = maxWidth;
+                    canvas.height = maxHeight;
+
+                    ctx.clearRect(0, 0, maxWidth, maxHeight);
+                    for (var y = 0; y < maxHeight; y++) {
+                        for (var x = 0; x < maxWidth; x++) {
+                            var pixel = matrixSubt[y][x];
+                            ctx.fillStyle = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+
+
+                    var imageDataURL = canvas.toDataURL();
+
+                    document.querySelector('.resultado').classList.remove('d-none');
+                    downloadImage(imageDataURL, 'subtracao');
+                };
+                img2.src = evt2.target.result;
+            };
+            img1.src = evt.target.result;
+        };
+        reader2.readAsDataURL(input2);
+    };
+    reader1.readAsDataURL(input1);
 }
 
 function calcularHistograma(imageData) {
