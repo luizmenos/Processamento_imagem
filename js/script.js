@@ -1296,7 +1296,100 @@ function blendImagem() {
     };
     reader1.readAsDataURL(input1);
 }
+function convolucaoMin() {
+    var input1 = document.getElementById('arquivoInput').files[0];
 
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Convolução');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o tamanho do Kernel (3, 5, 7, 11)");
+    var kernelSize = parseInt(inputNumber);
+    if (isNaN(kernelSize) || ![3, 5, 7, 11].includes(kernelSize)) {
+        alert('Digite um tamanho de kernel válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var filteredImageData = minFilterManual(imageData, canvas.width, canvas.height, kernelSize);
+
+            canvas.width = filteredImageData.width;
+            canvas.height = filteredImageData.height;
+            ctx.putImageData(filteredImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            for (var y = 0; y < canvasResultado.height; y++) {
+                for (var x = 0; x < canvasResultado.width; x++) {
+                    var index = (y * canvasResultado.width + x) * 4;
+                    var r = filteredImageData.data[index];
+                    var g = filteredImageData.data[index + 1];
+                    var b = filteredImageData.data[index + 2];
+                    ctxResultado.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    ctxResultado.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'convolucao_min');
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
+}
+
+function minFilterManual(imageData, width, height, kernelSize) {
+    let k = Math.floor(kernelSize / 2);
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let min = 255;
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+                    let pixelValue = imageData.data[index];
+
+                    if (pixelValue < min) {
+                        min = pixelValue;
+                    }
+                }
+            }
+
+            let index = (i * width + j) * 4;
+            filteredData[index] = min; // R
+            filteredData[index + 1] = min; // G
+            filteredData[index + 2] = min; // B
+        }
+    }
+
+    return new ImageData(filteredData, width, height);
+}
 function calcularHistograma(imageData) {
     var pixels = imageData.data;
     var histogramaR = Array.from({ length: 256 }, () => 0);
