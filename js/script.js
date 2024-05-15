@@ -1382,9 +1382,411 @@ function minFilterManual(imageData, width, height, kernelSize) {
             }
 
             let index = (i * width + j) * 4;
-            filteredData[index] = min; // R
-            filteredData[index + 1] = min; // G
-            filteredData[index + 2] = min; // B
+            filteredData[index] = min;
+            filteredData[index + 1] = min;
+            filteredData[index + 2] = min;
+        }
+    }
+
+    return new ImageData(filteredData, width, height);
+}
+
+function convolucaoMax() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Convolução');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o tamanho do Kernel (3, 5, 7, 11)");
+    var kernelSize = parseInt(inputNumber);
+    if (isNaN(kernelSize) || ![3, 5, 7, 11].includes(kernelSize)) {
+        alert('Digite um tamanho de kernel válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var filteredImageData = maxFilterManual(imageData, canvas.width, canvas.height, kernelSize);
+
+            canvas.width = filteredImageData.width;
+            canvas.height = filteredImageData.height;
+            ctx.putImageData(filteredImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            for (var y = 0; y < canvasResultado.height; y++) {
+                for (var x = 0; x < canvasResultado.width; x++) {
+                    var index = (y * canvasResultado.width + x) * 4;
+                    var r = filteredImageData.data[index];
+                    var g = filteredImageData.data[index + 1];
+                    var b = filteredImageData.data[index + 2];
+                    ctxResultado.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    ctxResultado.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'convolucao_max');
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
+}
+
+function maxFilterManual(imageData, width, height, kernelSize) {
+    let k = Math.floor(kernelSize / 2);
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let max = 0;
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+                    let pixelValue = imageData.data[index];
+
+                    if (pixelValue > max) {
+                        max = pixelValue;
+                    }
+                }
+            }
+
+            let index = (i * width + j) * 4;
+            filteredData[index] = max;
+            filteredData[index + 1] = max;
+            filteredData[index + 2] = max;
+        }
+    }
+
+    return new ImageData(filteredData, width, height);
+}
+
+
+function convolucaoMedia() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Convolução');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o tamanho do Kernel (3, 5, 7, 11)");
+    var kernelSize = parseInt(inputNumber);
+    if (isNaN(kernelSize) || ![3, 5, 7, 11].includes(kernelSize)) {
+        alert('Digite um tamanho de kernel válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var filteredImageData = mediaFilterManual(imageData, canvas.width, canvas.height, kernelSize);
+
+            canvas.width = filteredImageData.width;
+            canvas.height = filteredImageData.height;
+            ctx.putImageData(filteredImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            for (var y = 0; y < canvasResultado.height; y++) {
+                for (var x = 0; x < canvasResultado.width; x++) {
+                    var index = (y * canvasResultado.width + x) * 4;
+                    var r = filteredImageData.data[index];
+                    var g = filteredImageData.data[index + 1];
+                    var b = filteredImageData.data[index + 2];
+                    ctxResultado.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    ctxResultado.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'convolucao_media');
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
+}
+
+function mediaFilterManual(imageData, width, height, kernelSize) {
+    let k = Math.floor(kernelSize / 2);
+    let kernelArea = Math.pow(kernelSize, 2);
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let sum = 0;
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+                    let pixelValue = imageData.data[index];
+
+                    sum += pixelValue;
+                }
+            }
+
+            let average = sum / kernelArea;
+
+
+
+            let index = (i * width + j) * 4;
+            filteredData[index] = average;
+            filteredData[index + 1] = average;
+            filteredData[index + 2] = average;
+        }
+    }
+
+    return new ImageData(filteredData, width, height);
+}
+
+function convolucaoMediana() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Convolução');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o tamanho do Kernel (3, 5, 7, 11)");
+    var kernelSize = parseInt(inputNumber);
+    if (isNaN(kernelSize) || ![3, 5, 7, 11].includes(kernelSize)) {
+        alert('Digite um tamanho de kernel válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var filteredImageData = medianaFilterManual(imageData, canvas.width, canvas.height, kernelSize);
+
+            canvas.width = filteredImageData.width;
+            canvas.height = filteredImageData.height;
+            ctx.putImageData(filteredImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            for (var y = 0; y < canvasResultado.height; y++) {
+                for (var x = 0; x < canvasResultado.width; x++) {
+                    var index = (y * canvasResultado.width + x) * 4;
+                    var r = filteredImageData.data[index];
+                    var g = filteredImageData.data[index + 1];
+                    var b = filteredImageData.data[index + 2];
+                    ctxResultado.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    ctxResultado.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'convolucao_mediana');
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
+}
+
+function medianaFilterManual(imageData, width, height, kernelSize) {
+    let k = Math.floor(kernelSize / 2);
+    let kernelArea = Math.pow(kernelSize, 2);
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let values = [];
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+                    let pixelValue = imageData.data[index];
+
+                    values.push(pixelValue);
+                }
+            }
+
+            let mediana = values.sort(function (a, b) {
+                return a - b;
+            });
+
+            mediana = mediana[Math.floor(mediana.length / 2)];
+
+            let index = (i * width + j) * 4;
+            filteredData[index] = mediana;
+            filteredData[index + 1] = mediana;
+            filteredData[index + 2] = mediana;
+        }
+    }
+
+    return new ImageData(filteredData, width, height);
+}
+
+function convolucaoOrdem() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Convolução');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o tamanho do Kernel (3, 5, 7, 11)");
+    var kernelSize = parseInt(inputNumber);
+    if (isNaN(kernelSize) || ![3, 5, 7, 11].includes(kernelSize)) {
+        alert('Digite um tamanho de kernel válido.');
+        return;
+    }
+
+    var inputOrdem = prompt("Insira o índice do pixel que será o substituto");
+    inputOrdem = parseInt(inputOrdem);
+    var maxOrdem = Math.pow(kernelSize)
+    if (isNaN(inputOrdem) || inputOrdem > maxOrdem || inputOrdem < 0) {
+        alert('Digite um índice válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var filteredImageData = orderFilterManual(imageData, canvas.width, canvas.height, kernelSize, inputOrdem);
+
+            canvas.width = filteredImageData.width;
+            canvas.height = filteredImageData.height;
+            ctx.putImageData(filteredImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            for (var y = 0; y < canvasResultado.height; y++) {
+                for (var x = 0; x < canvasResultado.width; x++) {
+                    var index = (y * canvasResultado.width + x) * 4;
+                    var r = filteredImageData.data[index];
+                    var g = filteredImageData.data[index + 1];
+                    var b = filteredImageData.data[index + 2];
+                    ctxResultado.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    ctxResultado.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'convolucao_mediana');
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
+}
+
+function orderFilterManual(imageData, width, height, kernelSize, inputOrdem) {
+    let k = Math.floor(kernelSize / 2);
+    let kernelArea = Math.pow(kernelSize, 2);
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let values = [];
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+                    let pixelValue = imageData.data[index];
+
+                    values.push(pixelValue);
+                }
+            }
+
+            let mediana = values.sort(function (a, b) {
+                return a - b;
+            });
+
+            mediana = mediana[inputOrdem];
+
+            let index = (i * width + j) * 4;
+            filteredData[index] = mediana;
+            filteredData[index + 1] = mediana;
+            filteredData[index + 2] = mediana;
         }
     }
 
