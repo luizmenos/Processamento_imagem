@@ -1366,25 +1366,35 @@ function minFilterManual(imageData, width, height, kernelSize) {
 
     for (let i = 0; i < height; i++) {
         for (let j = 0; j < width; j++) {
-            let min = 255;
+            let minR = 255;
+            let minG = 255;
+            let minB = 255;
 
             for (let x = -k; x <= k; x++) {
                 for (let y = -k; y <= k; y++) {
                     let ii = Math.min(Math.max(i + x, 0), height - 1);
                     let jj = Math.min(Math.max(j + y, 0), width - 1);
                     let index = (ii * width + jj) * 4;
-                    let pixelValue = imageData.data[index];
+                    let pixelValueR = imageData.data[index];
+                    let pixelValueG = imageData.data[index + 1];
+                    let pixelValueB = imageData.data[index + 2];
 
-                    if (pixelValue < min) {
-                        min = pixelValue;
+                    if (pixelValueR < minR) {
+                        minR = pixelValueR;
+                    }
+                    if (pixelValueG < minG) {
+                        minG = pixelValueG;
+                    }
+                    if (pixelValueB < minB) {
+                        minB = pixelValueB;
                     }
                 }
             }
 
             let index = (i * width + j) * 4;
-            filteredData[index] = min;
-            filteredData[index + 1] = min;
-            filteredData[index + 2] = min;
+            filteredData[index] = minR;
+            filteredData[index + 1] = minG;
+            filteredData[index + 2] = minB;
         }
     }
 
@@ -1461,25 +1471,35 @@ function maxFilterManual(imageData, width, height, kernelSize) {
 
     for (let i = 0; i < height; i++) {
         for (let j = 0; j < width; j++) {
-            let max = 0;
+            let maxR = 0;
+            let maxG = 0;
+            let maxB = 0;
 
             for (let x = -k; x <= k; x++) {
                 for (let y = -k; y <= k; y++) {
                     let ii = Math.min(Math.max(i + x, 0), height - 1);
                     let jj = Math.min(Math.max(j + y, 0), width - 1);
                     let index = (ii * width + jj) * 4;
-                    let pixelValue = imageData.data[index];
+                    let pixelValueR = imageData.data[index];
+                    let pixelValueG = imageData.data[index + 1];
+                    let pixelValueB = imageData.data[index + 2];
 
-                    if (pixelValue > max) {
-                        max = pixelValue;
+                    if (pixelValueR > maxR) {
+                        maxR = pixelValueR;
+                    }
+                    if (pixelValueG > maxG) {
+                        maxG = pixelValueG;
+                    }
+                    if (pixelValueB > maxB) {
+                        maxB = pixelValueB;
                     }
                 }
             }
 
             let index = (i * width + j) * 4;
-            filteredData[index] = max;
-            filteredData[index + 1] = max;
-            filteredData[index + 2] = max;
+            filteredData[index] = maxR;
+            filteredData[index + 1] = maxG;
+            filteredData[index + 2] = maxB;
         }
     }
 
@@ -1558,27 +1578,35 @@ function mediaFilterManual(imageData, width, height, kernelSize) {
 
     for (let i = 0; i < height; i++) {
         for (let j = 0; j < width; j++) {
-            let sum = 0;
+            let sumR = 0;
+            let sumG = 0;
+            let sumB = 0;
 
             for (let x = -k; x <= k; x++) {
                 for (let y = -k; y <= k; y++) {
                     let ii = Math.min(Math.max(i + x, 0), height - 1);
                     let jj = Math.min(Math.max(j + y, 0), width - 1);
                     let index = (ii * width + jj) * 4;
-                    let pixelValue = imageData.data[index];
+                    let pixelValueR = imageData.data[index];
+                    let pixelValueG = imageData.data[index + 1];
+                    let pixelValueB = imageData.data[index + 2];
 
-                    sum += pixelValue;
+                    sumR += pixelValueR;
+                    sumG += pixelValueG;
+                    sumB += pixelValueB;
                 }
             }
 
-            let average = sum / kernelArea;
+            let averageR = sumR / kernelArea;
+            let averageG = sumG / kernelArea;
+            let averageB = sumB / kernelArea;
 
 
 
             let index = (i * width + j) * 4;
-            filteredData[index] = average;
-            filteredData[index + 1] = average;
-            filteredData[index + 2] = average;
+            filteredData[index] = averageR;
+            filteredData[index + 1] = averageG;
+            filteredData[index + 2] = averageB;
         }
     }
 
@@ -1656,29 +1684,44 @@ function medianaFilterManual(imageData, width, height, kernelSize) {
 
     for (let i = 0; i < height; i++) {
         for (let j = 0; j < width; j++) {
-            let values = [];
+            let valuesR = [];
+            let valuesG = [];
+            let valuesB = [];
 
             for (let x = -k; x <= k; x++) {
                 for (let y = -k; y <= k; y++) {
                     let ii = Math.min(Math.max(i + x, 0), height - 1);
                     let jj = Math.min(Math.max(j + y, 0), width - 1);
                     let index = (ii * width + jj) * 4;
-                    let pixelValue = imageData.data[index];
+                    let pixelValueR = imageData.data[index];
+                    let pixelValueG = imageData.data[index + 1];
+                    let pixelValueB = imageData.data[index + 2];
 
-                    values.push(pixelValue);
+                    valuesR.push(pixelValueR);
+                    valuesG.push(pixelValueG);
+                    valuesB.push(pixelValueB);
+
                 }
             }
 
-            let mediana = values.sort(function (a, b) {
+            let medianaR = valuesR.sort(function (a, b) {
+                return a - b;
+            });
+            let medianaG = valuesG.sort(function (a, b) {
+                return a - b;
+            });
+            let medianaB = valuesB.sort(function (a, b) {
                 return a - b;
             });
 
-            mediana = mediana[Math.floor(mediana.length / 2)];
+            medianaR = medianaR[Math.floor(medianaR.length / 2)];
+            medianaG = medianaG[Math.floor(medianaG.length / 2)];
+            medianaB = medianaB[Math.floor(medianaB.length / 2)];
 
             let index = (i * width + j) * 4;
-            filteredData[index] = mediana;
-            filteredData[index + 1] = mediana;
-            filteredData[index + 2] = mediana;
+            filteredData[index] = medianaR;
+            filteredData[index + 1] = medianaG;
+            filteredData[index + 2] = medianaB;
         }
     }
 
@@ -1702,7 +1745,7 @@ function convolucaoOrdem() {
 
     var inputOrdem = prompt("Insira o índice do pixel que será o substituto");
     inputOrdem = parseInt(inputOrdem);
-    var maxOrdem = Math.pow(kernelSize)
+    var maxOrdem = Math.pow(kernelSize, 2)
     if (isNaN(inputOrdem) || inputOrdem > maxOrdem || inputOrdem < 0) {
         alert('Digite um índice válido.');
         return;
@@ -1764,29 +1807,43 @@ function orderFilterManual(imageData, width, height, kernelSize, inputOrdem) {
 
     for (let i = 0; i < height; i++) {
         for (let j = 0; j < width; j++) {
-            let values = [];
+            let valuesR = [];
+            let valuesG = [];
+            let valuesB = [];
 
             for (let x = -k; x <= k; x++) {
                 for (let y = -k; y <= k; y++) {
                     let ii = Math.min(Math.max(i + x, 0), height - 1);
                     let jj = Math.min(Math.max(j + y, 0), width - 1);
                     let index = (ii * width + jj) * 4;
-                    let pixelValue = imageData.data[index];
+                    let pixelValueR = imageData.data[index];
+                    let pixelValueG = imageData.data[index + 1];
+                    let pixelValueB = imageData.data[index + 2];
 
-                    values.push(pixelValue);
+                    valuesR.push(pixelValueR);
+                    valuesG.push(pixelValueG);
+                    valuesB.push(pixelValueB);
                 }
             }
 
-            let mediana = values.sort(function (a, b) {
+            let medianaR = valuesR.sort(function (a, b) {
+                return a - b;
+            });
+            let medianaG = valuesG.sort(function (a, b) {
+                return a - b;
+            });
+            let medianaB = valuesB.sort(function (a, b) {
                 return a - b;
             });
 
-            mediana = mediana[inputOrdem];
+            medianaR = medianaR[inputOrdem];
+            medianaG = medianaG[inputOrdem];
+            medianaB = medianaB[inputOrdem];
 
             let index = (i * width + j) * 4;
-            filteredData[index] = mediana;
-            filteredData[index + 1] = mediana;
-            filteredData[index + 2] = mediana;
+            filteredData[index] = medianaR;
+            filteredData[index + 1] = medianaG;
+            filteredData[index + 2] = medianaB;
         }
     }
 
