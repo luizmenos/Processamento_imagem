@@ -1214,7 +1214,8 @@ function blendImagem() {
     }
 
     var inputNumber = prompt("Insira o valor para a Taxa de Mistura, sendo de 0.0 a 1.0");
-    var sub = parseFloat(inputNumber);
+    var sub = parseFloat(inputNumber.replace(',', '.'));
+    console.log(sub);
     if (isNaN(sub) || (sub > 1 || sub < 0)) {
         alert('Digite um número válido.');
         return;
@@ -1849,6 +1850,256 @@ function orderFilterManual(imageData, width, height, kernelSize, inputOrdem) {
 
     return new ImageData(filteredData, width, height);
 }
+
+function suavizacaoConservativa() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Suavização Conservativa');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o número de iterações para a difusão anisotrópica");
+    var iterations = parseInt(inputNumber);
+    if (isNaN(iterations) || iterations < 1) {
+        alert('Digite um número válido de iterações.');
+        return;
+    }
+
+    inputNumber = prompt("Insira o valor de lambda (0.1 a 1.0)");
+    var lambda = parseFloat(inputNumber);
+    if (isNaN(lambda) || lambda < 0.1 || lambda > 1.0) {
+        alert('Digite um valor de lambda válido.');
+        return;
+    }
+
+    inputNumber = prompt("Insira o valor de kappa (0.1 a 1.0)");
+    var kappa = parseFloat(inputNumber);
+    if (isNaN(kappa) || kappa < 0.1 || kappa > 1.0) {
+        alert('Digite um valor de kappa válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var smoothedImageData = anisotropicDiffusion(imageData, iterations, lambda, kappa);
+
+            canvas.width = smoothedImageData.width;
+            canvas.height = smoothedImageData.height;
+            ctx.putImageData(smoothedImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            ctxResultado.drawImage(canvas, 0, 0);
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'suavizacao_conservativa');
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
+}
+
+function anisotropicDiffusion(imageData, iterations, lambda, kappa) {
+    let pixels = imageData.data;
+    let width = imageData.width;
+    let height = imageData.height;
+
+    function calculateGradient(x, y) {
+        let index = (y * width + x) * 4;
+        let gradientX = (getPixelValue(x + 1, y) - getPixelValue(x, y)) / 255;
+        let gradientY = (getPixelValue(x, y + 1) - getPixelValue(x, y)) / 255;
+        return Math.sqrt(gradientX * gradientX + gradientY * gradientY);
+    }
+
+    function getPixelValue(x, y) {
+        let index = (y * width + x) * 4;
+        return (pixels[index] + pixels[index + 1] + pixels[index + 2]) / 3;
+    }
+
+    function applyDiffusion() {
+        let newData = new Uint8ClampedArray(pixels);
+
+        for (let i = 1; i < height - 1; i++) {
+            for (let j = 1; j < width - 1; j++) {
+                let pixelIndex = (i * width + j) * 4;
+                let gradient = calculateGradient(j, i);
+
+                let coef = Math.exp(-(gradient * gradient) / (lambda * lambda));
+
+                for (let k = 0; k < 3; k++) {
+                    let newVal = 0;
+                    for (let n = -1; n <= 1; n++) {
+                        for (let m = -1; m <= 1; m++) {
+                            let neighborIndex = ((i + n) * width + (j + m)) * 4 + k;
+                            newVal += coef * (pixels[neighborIndex] - pixels[pixelIndex + k]);
+                        }
+                    }
+                    newData[pixelIndex + k] = pixels[pixelIndex + k] + kappa * newVal;
+                }
+            }
+        }
+        pixels.set(newData);
+    }
+
+    for (let i = 0; i < iterations; i++) {
+        applyDiffusion();
+    }
+
+    return imageData;
+}
+
+function convolucaoGaussiana() {
+    var input1 = document.getElementById('arquivoInput').files[0];
+
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Convolução');
+        return;
+    }
+
+    var inputNumber = prompt("Insira o tamanho do Kernel (3, 5, 7, 11)");
+    var kernelSize = parseInt(inputNumber);
+    if (isNaN(kernelSize) || ![3, 5, 7, 11].includes(kernelSize)) {
+        alert('Digite um tamanho de kernel válido.');
+        return;
+    }
+
+    inputNumber = prompt("Insira um valor para sigma (-10.0 a 10.0)");
+    var sigmaValue = parseFloat(inputNumber.replace(',', '.'));
+    if (isNaN(sigmaValue) || sigmaValue < -10.0 || sigmaValue > 10.0) {
+        alert('Digite um tamanho de sigma válido.');
+        return;
+    }
+
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var filteredImageData = gaussianFilter(imageData, canvas.width, canvas.height, kernelSize, sigmaValue);
+
+            canvas.width = filteredImageData.width;
+            canvas.height = filteredImageData.height;
+            ctx.putImageData(filteredImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            for (var y = 0; y < canvasResultado.height; y++) {
+                for (var x = 0; x < canvasResultado.width; x++) {
+                    var index = (y * canvasResultado.width + x) * 4;
+                    var r = filteredImageData.data[index];
+                    var g = filteredImageData.data[index + 1];
+                    var b = filteredImageData.data[index + 2];
+                    ctxResultado.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    ctxResultado.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'convolucao_gaussiana');
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
+}
+
+function gaussianKernel(kernelSize, sigma) {
+    let kernel = [];
+    let kernelSum = 0;
+
+    for (let i = 0; i < kernelSize; i++) {
+        kernel[i] = [];
+        for (let j = 0; j < kernelSize; j++) {
+            let x = i - Math.floor(kernelSize / 2);
+            let y = j - Math.floor(kernelSize / 2);
+            let exponent = -((x * x + y * y) / (2 * sigma * sigma));
+            kernel[i][j] = Math.exp(exponent) / (2 * Math.PI * sigma * sigma);
+            kernelSum += kernel[i][j];
+        }
+    }
+
+    for (let i = 0; i < kernelSize; i++) {
+        for (let j = 0; j < kernelSize; j++) {
+            kernel[i][j] /= kernelSum;
+        }
+    }
+
+    return kernel;
+}
+
+function gaussianFilter(imageData, width, height, kernelSize, sigma) {
+    let k = Math.floor(kernelSize / 2);
+    let kernel = gaussianKernel(kernelSize, sigma);
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let sumR = 0, sumG = 0, sumB = 0;
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+                    let pixelValueR = imageData.data[index];
+                    let pixelValueG = imageData.data[index + 1];
+                    let pixelValueB = imageData.data[index + 2];
+                    let weight = kernel[x + k][y + k];
+
+                    sumR += pixelValueR * weight;
+                    sumG += pixelValueG * weight;
+                    sumB += pixelValueB * weight;
+                }
+            }
+
+            let newIndex = (i * width + j) * 4;
+            filteredData[newIndex] = Math.round(sumR);
+            filteredData[newIndex + 1] = Math.round(sumG);
+            filteredData[newIndex + 2] = Math.round(sumB);
+
+        }
+    }
+
+    return new ImageData(filteredData, width, height);
+}
+
 function calcularHistograma(imageData) {
     var pixels = imageData.data;
     var histogramaR = Array.from({ length: 256 }, () => 0);
