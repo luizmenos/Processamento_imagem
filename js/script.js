@@ -609,6 +609,134 @@ function equalizarImagem() {
     reader.readAsDataURL(input.files[0]);
 }
 
+
+function calcularHistograma(imageData) {
+    var pixels = imageData.data;
+    var histogramaR = Array.from({ length: 256 }, () => 0);
+    var histogramaG = Array.from({ length: 256 }, () => 0);
+    var histogramaB = Array.from({ length: 256 }, () => 0);
+
+    for (var i = 0; i < pixels.length; i += 4) {
+        var r = pixels[i];
+        var g = pixels[i + 1];
+        var b = pixels[i + 2];
+
+        histogramaR[r]++;
+        histogramaG[g]++;
+        histogramaB[b]++;
+    }
+
+    return [histogramaR, histogramaG, histogramaB];
+}
+
+function equalizarHistograma(imageData, histogramas) {
+    var pixels = imageData.data;
+    var totalPixels = imageData.width * imageData.height;
+    var acumuladoHistogramaR = new Array(256).fill(0);
+    var acumuladoHistogramaG = new Array(256).fill(0);
+    var acumuladoHistogramaB = new Array(256).fill(0);
+
+    acumuladoHistogramaR[0] = histogramas[0][0];
+    acumuladoHistogramaG[0] = histogramas[1][0];
+    acumuladoHistogramaB[0] = histogramas[2][0];
+
+    for (var i = 1; i < 256; i++) {
+        acumuladoHistogramaR[i] = acumuladoHistogramaR[i - 1] + histogramas[0][i];
+        acumuladoHistogramaG[i] = acumuladoHistogramaG[i - 1] + histogramas[1][i];
+        acumuladoHistogramaB[i] = acumuladoHistogramaB[i - 1] + histogramas[2][i];
+    }
+
+    for (var i = 0; i < pixels.length; i += 4) {
+        var intensidadeR = pixels[i];
+        var intensidadeG = pixels[i + 1];
+        var intensidadeB = pixels[i + 2];
+
+        var novoValorR = acumuladoHistogramaR[intensidadeR] * 255 / totalPixels;
+        var novoValorG = acumuladoHistogramaG[intensidadeG] * 255 / totalPixels;
+        var novoValorB = acumuladoHistogramaB[intensidadeB] * 255 / totalPixels;
+
+        pixels[i] = novoValorR;
+        pixels[i + 1] = novoValorG;
+        pixels[i + 2] = novoValorB;
+    }
+}
+
+
+function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
+    destroyCharts();
+    var count = 0;
+    document.querySelectorAll('canvas[id^="histogramaCanvas"]').forEach((canvas) => {
+        var ctx = canvas.getContext('2d');
+        if (count == 0) {
+            window.chartPre = newChart(histogramaPre, ctx, count);
+        } else {
+            window.chartPos = newChart(histogramaPos, ctx, count);
+        }
+        canvas.classList.remove('d-none');
+        count++;
+    })
+}
+
+
+function newChart(histogramas, ctx, cont) {
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Array.from({ length: 256 }, (_, i) => i.toString()),
+            datasets: [
+                {
+                    label: 'R',
+                    data: histogramas[0],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'G',
+                    data: histogramas[1],
+                    backgroundColor: 'rgba(75, 255, 192, 0.2)',
+                    borderColor: 'rgba(75, 255, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'B',
+                    data: histogramas[2],
+                    backgroundColor: 'rgba(54, 162, 255, 0.2)',
+                    borderColor: 'rgba(54, 162, 255, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: cont == 0 ? 'Pr\u{00E9}-Equaliza\u{00E7}\u{00E3}o' : 'P\u{00F3}s-Equaliza\u{00E7}\u{00E3}o'
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { stepSize: 1 }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+
+    })
+}
+
+function destroyCharts() {
+    var quantGraficos = document.querySelectorAll('.canvasGrafico:not(.d-none)').length;
+
+    if (quantGraficos >= 2) {
+        window.chartPre.destroy();
+        window.chartPos.destroy();
+    }
+
+}
+
 function and() {
     var input1 = document.getElementById('arquivoInput').files[0];
     var input2 = document.getElementById('arquivoInput2').files[0];
@@ -1024,6 +1152,10 @@ function multiplicarImagem() {
                     r = Math.round(r);
                     g = Math.round(g);
                     b = Math.round(b);
+
+                    if (r > 255) r = 255;
+                    if (g > 255) g = 255;
+                    if (b > 255) b = 255;
 
                     row.push([r, g, b]);
                 }
@@ -1859,27 +1991,12 @@ function suavizacaoConservativa() {
         return;
     }
 
-    var inputNumber = prompt("Insira o número de iterações para a difusão anisotrópica");
-    var iterations = parseInt(inputNumber);
-    if (isNaN(iterations) || iterations < 1) {
-        alert('Digite um número válido de iterações.');
+    var inputNumber = prompt("Insira o tamanho do Kernel (3, 5, 7, 11)");
+    var kernelSize = parseInt(inputNumber);
+    if (isNaN(kernelSize) || ![3, 5, 7, 11].includes(kernelSize)) {
+        alert('Digite um tamanho de kernel válido.');
         return;
     }
-
-    inputNumber = prompt("Insira o valor de lambda (0.1 a 1.0)");
-    var lambda = parseFloat(inputNumber);
-    if (isNaN(lambda) || lambda < 0.1 || lambda > 1.0) {
-        alert('Digite um valor de lambda válido.');
-        return;
-    }
-
-    inputNumber = prompt("Insira o valor de kappa (0.1 a 1.0)");
-    var kappa = parseFloat(inputNumber);
-    if (isNaN(kappa) || kappa < 0.1 || kappa > 1.0) {
-        alert('Digite um valor de kappa válido.');
-        return;
-    }
-
     var reader1 = new FileReader();
 
     reader1.onload = function (evt) {
@@ -1894,7 +2011,7 @@ function suavizacaoConservativa() {
             ctx.drawImage(img1, 0, 0);
 
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            var smoothedImageData = anisotropicDiffusion(imageData, iterations, lambda, kappa);
+            var smoothedImageData = suavizationManual(imageData, canvas.width, canvas.height, kernelSize);
 
             canvas.width = smoothedImageData.width;
             canvas.height = smoothedImageData.height;
@@ -1920,53 +2037,68 @@ function suavizacaoConservativa() {
     reader1.readAsDataURL(input1);
 }
 
-function anisotropicDiffusion(imageData, iterations, lambda, kappa) {
-    let pixels = imageData.data;
-    let width = imageData.width;
-    let height = imageData.height;
+function suavizationManual(imageData, width, height, kernelSize) {
+    let k = Math.floor(kernelSize / 2);
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
 
-    function calculateGradient(x, y) {
-        let index = (y * width + x) * 4;
-        let gradientX = (getPixelValue(x + 1, y) - getPixelValue(x, y)) / 255;
-        let gradientY = (getPixelValue(x, y + 1) - getPixelValue(x, y)) / 255;
-        return Math.sqrt(gradientX * gradientX + gradientY * gradientY);
-    }
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let valuesR = [];
+            let valuesG = [];
+            let valuesB = [];
+            let centralR;
+            let centralG;
+            let centralB;
 
-    function getPixelValue(x, y) {
-        let index = (y * width + x) * 4;
-        return (pixels[index] + pixels[index + 1] + pixels[index + 2]) / 3;
-    }
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
 
-    function applyDiffusion() {
-        let newData = new Uint8ClampedArray(pixels);
-
-        for (let i = 1; i < height - 1; i++) {
-            for (let j = 1; j < width - 1; j++) {
-                let pixelIndex = (i * width + j) * 4;
-                let gradient = calculateGradient(j, i);
-
-                let coef = Math.exp(-(gradient * gradient) / (lambda * lambda));
-
-                for (let k = 0; k < 3; k++) {
-                    let newVal = 0;
-                    for (let n = -1; n <= 1; n++) {
-                        for (let m = -1; m <= 1; m++) {
-                            let neighborIndex = ((i + n) * width + (j + m)) * 4 + k;
-                            newVal += coef * (pixels[neighborIndex] - pixels[pixelIndex + k]);
-                        }
+                    if (x === 0 && y === 0) {
+                        centralR = imageData.data[index];
+                        centralG = imageData.data[index + 1];
+                        centralB = imageData.data[index + 2];
+                    } else {
+                        valuesR.push(imageData.data[index]);
+                        valuesG.push(imageData.data[index + 1]);
+                        valuesB.push(imageData.data[index + 2]);
                     }
-                    newData[pixelIndex + k] = pixels[pixelIndex + k] + kappa * newVal;
                 }
             }
+
+
+
+            let minR = Math.min(...valuesR);
+            let minG = Math.min(...valuesG);
+            let minB = Math.min(...valuesB);
+
+            let maxR = Math.max(...valuesR);
+            let maxG = Math.max(...valuesG);
+            let maxB = Math.max(...valuesB);
+
+            if (centralR > maxR) valorR = maxR;
+            else if (centralR < minR) valorR = minR;
+            else valorR = centralR;
+
+            if (centralG > maxG) valorG = maxG;
+            else if (centralG < minG) valorG = minG;
+            else valorG = centralG;
+
+            if (centralB > maxB) valorB = maxB;
+            else if (centralB < minB) valorB = minB;
+            else valorB = centralB;
+
+            let index = (i * width + j) * 4;
+            filteredData[index] = valorR;
+            filteredData[index + 1] = valorG;
+            filteredData[index + 2] = valorB;
+            filteredData[index + 3] = 255;
         }
-        pixels.set(newData);
     }
 
-    for (let i = 0; i < iterations; i++) {
-        applyDiffusion();
-    }
-
-    return imageData;
+    return new ImageData(filteredData, width, height);
 }
 
 function convolucaoGaussiana() {
@@ -2100,72 +2232,140 @@ function gaussianFilter(imageData, width, height, kernelSize, sigma) {
     return new ImageData(filteredData, width, height);
 }
 
-function calcularHistograma(imageData) {
-    var pixels = imageData.data;
-    var histogramaR = Array.from({ length: 256 }, () => 0);
-    var histogramaG = Array.from({ length: 256 }, () => 0);
-    var histogramaB = Array.from({ length: 256 }, () => 0);
+function deteccaoBordas(metodo) {
+    var input1 = document.getElementById('arquivoInput').files[0];
 
-    for (var i = 0; i < pixels.length; i += 4) {
-        var r = pixels[i];
-        var g = pixels[i + 1];
-        var b = pixels[i + 2];
-
-        histogramaR[r]++;
-        histogramaG[g]++;
-        histogramaB[b]++;
+    if (!input1) {
+        alert('Selecione uma imagem para aplicar a Detecção de Bordas');
+        return;
     }
 
-    return [histogramaR, histogramaG, histogramaB];
+    var reader1 = new FileReader();
+
+    reader1.onload = function (evt) {
+        var img1 = new Image();
+
+        img1.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img1.width;
+            canvas.height = img1.height;
+            ctx.drawImage(img1, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var filteredImageData = borderFilter(imageData, canvas.width, canvas.height, metodo);
+
+            canvas.width = filteredImageData.width;
+            canvas.height = filteredImageData.height;
+            ctx.putImageData(filteredImageData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            for (var y = 0; y < canvasResultado.height; y++) {
+                for (var x = 0; x < canvasResultado.width; x++) {
+                    var index = (y * canvasResultado.width + x) * 4;
+                    var r = filteredImageData.data[index];
+                    var g = filteredImageData.data[index + 1];
+                    var b = filteredImageData.data[index + 2];
+                    ctxResultado.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    ctxResultado.fillRect(x, y, 1, 1);
+                }
+            }
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'deteccao_' + metodo);
+        };
+
+        img1.src = evt.target.result;
+    };
+
+    reader1.readAsDataURL(input1);
 }
 
-function equalizarHistograma(imageData, histogramas) {
-    var pixels = imageData.data;
-    var totalPixels = imageData.width * imageData.height;
-    var acumuladoHistogramaR = new Array(256).fill(0);
-    var acumuladoHistogramaG = new Array(256).fill(0);
-    var acumuladoHistogramaB = new Array(256).fill(0);
+function borderFilter(imageData, width, height, metodo) {
+    let matrizX = [];
+    let matrizY = [];
+    if (metodo == "sobel") {
+        matrizX = [
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1]
+        ];
 
-    acumuladoHistogramaR[0] = histogramas[0][0];
-    acumuladoHistogramaG[0] = histogramas[1][0];
-    acumuladoHistogramaB[0] = histogramas[2][0];
+        matrizY = [
+            [-1, -2, -1],
+            [0, 0, 0],
+            [1, 2, 1]
+        ]
+    } else if (metodo == "prewitt") {
+        matrizX = [
+            [-1, 0, 1],
+            [-1, 0, 1],
+            [-1, 0, 1]
+        ];
 
-    for (var i = 1; i < 256; i++) {
-        acumuladoHistogramaR[i] = acumuladoHistogramaR[i - 1] + histogramas[0][i];
-        acumuladoHistogramaG[i] = acumuladoHistogramaG[i - 1] + histogramas[1][i];
-        acumuladoHistogramaB[i] = acumuladoHistogramaB[i - 1] + histogramas[2][i];
+        matrizY = [
+            [-1, -1, -1],
+            [0, 0, 0],
+            [1, 1, 1]
+        ];
+
+    } else {
+        matrizX = [
+            [0, 1, 0],
+            [1, -4, 1],
+            [0, 1, 0]
+        ];
+
+        matrizY = [
+            [0, -1, 0],
+            [-1, 4, -1],
+            [0, -1, 0]
+        ];
+
     }
+    let filteredData = new Uint8ClampedArray(imageData.data.length);
 
-    for (var i = 0; i < pixels.length; i += 4) {
-        var intensidadeR = pixels[i];
-        var intensidadeG = pixels[i + 1];
-        var intensidadeB = pixels[i + 2];
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let gradientX = 0;
+            let gradientY = 0;
 
-        var novoValorR = acumuladoHistogramaR[intensidadeR] * 255 / totalPixels;
-        var novoValorG = acumuladoHistogramaG[intensidadeG] * 255 / totalPixels;
-        var novoValorB = acumuladoHistogramaB[intensidadeB] * 255 / totalPixels;
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
 
-        pixels[i] = novoValorR;
-        pixels[i + 1] = novoValorG;
-        pixels[i + 2] = novoValorB;
-    }
-}
+                    let pixelValue = imageData.data[index];
+                    let weightX = matrizX[x + 1][y + 1];
+                    let weightY = matrizY[x + 1][y + 1];
+
+                    gradientX += pixelValue * weightX;
+                    gradientY += pixelValue * weightY;
+                }
+            }
 
 
-function atualizarHistogramaGrafico(histogramaPre, histogramaPos) {
-    destroyCharts();
-    var count = 0;
-    document.querySelectorAll('canvas[id^="histogramaCanvas"]').forEach((canvas) => {
-        var ctx = canvas.getContext('2d');
-        if (count == 0) {
-            window.chartPre = newChart(histogramaPre, ctx, count);
-        } else {
-            window.chartPos = newChart(histogramaPos, ctx, count);
+            let magnitude = Math.sqrt(gradientX * gradientX + gradientY * gradientY);
+
+            let index = (i * width + j) * 4;
+            filteredData[index] = magnitude;
+            filteredData[index + 1] = magnitude;
+            filteredData[index + 2] = magnitude;
         }
-        canvas.classList.remove('d-none');
-        count++;
-    })
+    }
+
+    return new ImageData(filteredData, width, height);
 }
+
 
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
     var canvas = document.createElement('canvas');
@@ -2193,61 +2393,3 @@ function downloadImage(imageData, metodo) {
     link.href = imageData;
 }
 
-function newChart(histogramas, ctx, cont) {
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Array.from({ length: 256 }, (_, i) => i.toString()),
-            datasets: [
-                {
-                    label: 'R',
-                    data: histogramas[0],
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'G',
-                    data: histogramas[1],
-                    backgroundColor: 'rgba(75, 255, 192, 0.2)',
-                    borderColor: 'rgba(75, 255, 192, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'B',
-                    data: histogramas[2],
-                    backgroundColor: 'rgba(54, 162, 255, 0.2)',
-                    borderColor: 'rgba(54, 162, 255, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: cont == 0 ? 'Pr\u{00E9}-Equaliza\u{00E7}\u{00E3}o' : 'P\u{00F3}s-Equaliza\u{00E7}\u{00E3}o'
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { stepSize: 1 }
-                },
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-
-    })
-}
-
-function destroyCharts() {
-    var quantGraficos = document.querySelectorAll('.canvasGrafico:not(.d-none)').length;
-
-    if (quantGraficos >= 2) {
-        window.chartPre.destroy();
-        window.chartPos.destroy();
-    }
-
-}

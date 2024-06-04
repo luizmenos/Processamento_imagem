@@ -15,12 +15,12 @@
                 <div class="row">
                     <div class="col-md-6">
                         <input type="file" class="form-control" id="arquivoInput"
-                               accept=".png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem1(event)">
+                            accept=".png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem1(event)">
                     </div>
 
                     <div class="col-md-6">
                         <input type="file" class="form-control" id="arquivoInput2"
-                               accept=".png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem2(event)">
+                            accept=".png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="imagem2(event)">
                     </div>
                 </div>
                 <div class="row d-none row-images pt-5">
@@ -66,7 +66,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row pb-3">
                     <div class="col-md-12">
                         <div class="btn-group" role="group" aria-label="Convoluções">
                             <button onclick="convolucaoMin()" class="btn btn-primary">Convolução Mínimo</button>
@@ -74,10 +74,21 @@
                             <button onclick="convolucaoMedia()" class="btn btn-primary">Convolução Média</button>
                             <button onclick="convolucaoMediana()" class="btn btn-primary">Convolução Mediana</button>
                             <button onclick="convolucaoOrdem()" class="btn btn-primary">Convolução Ordem</button>
-                            <button onclick="suavizacaoConservativa()" class="btn btn-primary">Suavização Conservativa</button>
-                            <button onclick="convolucaoGaussiana()" class="btn btn-primary">Convolução Gaussiana</button>
+                            <button onclick="suavizacaoConservativa()" class="btn btn-primary">Suavização
+                                Conservativa</button>
+                            <button onclick="convolucaoGaussiana()" class="btn btn-primary">Convolução
+                                Gaussiana</button>
 
 
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-group" role="group" aria-label="Detecção de Bordas">
+                            <button onclick="deteccaoBordas('prewitt')" class="btn btn-primary">Filtro Prewitt</button>
+                            <button onclick="deteccaoBordas('sobel')" class="btn btn-primary">Filtro Sobel</button>
+                            <button onclick="deteccaoBordas('laplaciano')" class="btn btn-primary">Filtro Laplaciano</button>
                         </div>
                     </div>
                 </div>
