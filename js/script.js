@@ -2366,6 +2366,312 @@ function borderFilter(imageData, width, height, metodo) {
     return new ImageData(filteredData, width, height);
 }
 
+function executarDilatacao() {
+    var input = document.getElementById('arquivoInput').files[0];
+
+    if (!input) {
+        alert('Selecione uma imagem para aplicar a Dilatação');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var img = new Image();
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var dilatedData = dilatacao(imageData, canvas.width, canvas.height, 3);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            canvasResultado.width = dilatedData.width;
+            canvasResultado.height = dilatedData.height;
+            var ctxResultado = canvasResultado.getContext('2d');
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            ctxResultado.putImageData(dilatedData, 0, 0);
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'dilatacao');
+        };
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(input);
+}
+
+function dilatacao(imageData, width, height, kernelSize) {
+    let k = Math.floor(kernelSize / 2);
+    let dilatedData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let maxR = 0;
+            let maxG = 0;
+            let maxB = 0;
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+
+                    maxR = Math.max(maxR, imageData.data[index]);
+                    maxG = Math.max(maxG, imageData.data[index + 1]);
+                    maxB = Math.max(maxB, imageData.data[index + 2]);
+                }
+            }
+
+            let index = (i * width + j) * 4;
+            dilatedData[index] = maxR;
+            dilatedData[index + 1] = maxG;
+            dilatedData[index + 2] = maxB;
+            dilatedData[index + 3] = 255;
+        }
+    }
+
+    return new ImageData(dilatedData, width, height);
+}
+function executarErosao() {
+    var input = document.getElementById('arquivoInput').files[0];
+
+    if (!input) {
+        alert('Selecione uma imagem para aplicar a Erosão');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var img = new Image();
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var erodedData = erosao(imageData, canvas.width, canvas.height);
+
+            canvas.width = erodedData.width;
+            canvas.height = erodedData.height;
+            ctx.putImageData(erodedData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            ctxResultado.drawImage(canvas, 0, 0);
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'erosao');
+        };
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(input);
+}
+function erosao(imageData, width, height) {
+    let k = 1; // Tamanho do elemento estruturante (quadrado 3x3)
+    let erodedData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let minR = 255;
+            let minG = 255;
+            let minB = 255;
+
+            for (let x = -k; x <= k; x++) {
+                for (let y = -k; y <= k; y++) {
+                    let ii = Math.min(Math.max(i + x, 0), height - 1);
+                    let jj = Math.min(Math.max(j + y, 0), width - 1);
+                    let index = (ii * width + jj) * 4;
+
+                    minR = Math.min(minR, imageData.data[index]);
+                    minG = Math.min(minG, imageData.data[index + 1]);
+                    minB = Math.min(minB, imageData.data[index + 2]);
+                }
+            }
+
+            let index = (i * width + j) * 4;
+            erodedData[index] = minR;
+            erodedData[index + 1] = minG;
+            erodedData[index + 2] = minB;
+            erodedData[index + 3] = 255; // Definindo o canal alfa para 255
+        }
+    }
+
+    return new ImageData(erodedData, width, height);
+}
+
+function executarAbertura() {
+    var input = document.getElementById('arquivoInput').files[0];
+
+    if (!input) {
+        alert('Selecione uma imagem para aplicar a Abertura');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var img = new Image();
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var openedData = abertura(imageData, canvas.width, canvas.height);
+
+            canvas.width = openedData.width;
+            canvas.height = openedData.height;
+            ctx.putImageData(openedData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            ctxResultado.drawImage(canvas, 0, 0);
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'abertura');
+        };
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(input);
+}
+
+function abertura(imageData, width, height) {
+    let erodedData = erosao(imageData, width, height);
+    let openedData = dilatacao(erodedData, width, height, 3); // Dilatação com o mesmo elemento estruturante
+    return openedData;
+}
+
+function executarFechamento() {
+    var input = document.getElementById('arquivoInput').files[0];
+
+    if (!input) {
+        alert('Selecione uma imagem para aplicar o Fechamento');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var img = new Image();
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var closedData = fechamento(imageData, canvas.width, canvas.height);
+
+            canvas.width = closedData.width;
+            canvas.height = closedData.height;
+            ctx.putImageData(closedData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            ctxResultado.drawImage(canvas, 0, 0);
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'fechamento');
+        };
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(input);
+}
+
+function fechamento(imageData, width, height) {
+    let dilatedData = dilatacao(imageData, width, height, 3); // Dilatação com o mesmo elemento estruturante
+    let closedData = erosao(dilatedData, width, height);
+    return closedData;
+}
+
+function executarContorno() {
+    var input = document.getElementById('arquivoInput').files[0];
+
+    if (!input) {
+        alert('Selecione uma imagem para aplicar o Contorno');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+        var img = new Image();
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var contouredData = contorno(imageData, canvas.width, canvas.height);
+
+            canvas.width = contouredData.width;
+            canvas.height = contouredData.height;
+            ctx.putImageData(contouredData, 0, 0);
+
+            var canvasResultado = document.getElementById('canvasResultado');
+            var ctxResultado = canvasResultado.getContext('2d');
+
+            canvasResultado.width = canvas.width;
+            canvasResultado.height = canvas.height;
+
+            ctxResultado.clearRect(0, 0, canvasResultado.width, canvasResultado.height);
+            ctxResultado.drawImage(canvas, 0, 0);
+
+            var imageDataURL = canvasResultado.toDataURL();
+            document.querySelector('.resultado').classList.remove('d-none');
+            downloadImage(imageDataURL, 'contorno');
+        };
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(input);
+}
+
+function contorno(imageData, width, height) {
+    let erodedData = erosao(imageData, width, height);
+    let contouredData = new Uint8ClampedArray(imageData.data.length);
+
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            let index = (i * width + j) * 4;
+            contouredData[index] = imageData.data[index] - erodedData.data[index];
+            contouredData[index + 1] = imageData.data[index + 1] - erodedData.data[index + 1];
+            contouredData[index + 2] = imageData.data[index + 2] - erodedData.data[index + 2];
+            contouredData[index + 3] = 255; // Definindo o canal alfa para 255
+        }
+    }
+
+    return new ImageData(contouredData, width, height);
+}
 
 function resizeImageToMatchSize(image, maxWidth, maxHeight) {
     var canvas = document.createElement('canvas');

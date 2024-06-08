@@ -83,12 +83,25 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row pb-3">
                     <div class="col-md-12">
                         <div class="btn-group" role="group" aria-label="Detecção de Bordas">
                             <button onclick="deteccaoBordas('prewitt')" class="btn btn-primary">Filtro Prewitt</button>
                             <button onclick="deteccaoBordas('sobel')" class="btn btn-primary">Filtro Sobel</button>
-                            <button onclick="deteccaoBordas('laplaciano')" class="btn btn-primary">Filtro Laplaciano</button>
+                            <button onclick="deteccaoBordas('laplaciano')" class="btn btn-primary">Filtro
+                                Laplaciano</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row pb-3">
+                    <div class="col-md-12">
+                        <div class="btn-group" role="group" aria-label="Operações Morfológicas">
+                            <button onclick="executarDilatacao();" class="btn btn-primary">Dilatação</button>
+                            <button onclick="executarErosao();" class="btn btn-primary">Erosão</button>
+                            <button onclick="executarAbertura();" class="btn btn-primary">Abertura</button>
+                            <button onclick="executarFechamento();" class="btn btn-primary">Fechamento</button>
+                            <button onclick="executarContorno();" class="btn btn-primary">Contorno</button>
                         </div>
                     </div>
                 </div>
